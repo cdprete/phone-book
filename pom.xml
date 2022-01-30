@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.cdprete</groupId>
+    <artifactId>phone-book</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <name>Phone Book</name>
+    <description>A phone book application written in Spring Boot and Flutter</description>
+    <packaging>pom</packaging>
+
+    <developers>
+        <developer>
+            <name>Cosimo Damiano Prete</name>
+            <email>cosimo.prete.damiano@gmail.com</email>
+            <roles>
+                <role>Owner</role>
+                <role>Developer</role>
+            </roles>
+        </developer>
+    </developers>
+
+    <licenses>
+        <license>
+            <name>Creative Commons Attribution-NonCommercial 4.0 International License</name>
+            <url>https://creativecommons.org/licenses/by-nc/4.0/legalcode</url>
+        </license>
+    </licenses>
+
+    <inceptionYear>2022</inceptionYear>
+
+    <modules>
+        <module>phone-book-backend</module>
+    </modules>
+
+    <properties>
+        <docker.repository-name>docker.io/cdprete</docker.repository-name>
+        <docker.image-name>${project.artifactId}:${project.version}</docker.image-name>
+        <docker.qualified-image-name>${docker.repository-name}/${docker.image-name}</docker.qualified-image-name>
+
+        <docker.credentials.username />
+        <docker.credentials.password />
+    </properties>
+</project>

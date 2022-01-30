@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+    <changeSet id="create-contacts-table" author="cdprete">
+        <createTable tableName="CONTACTS" remarks="The CONTACTS table will store the details of every contact like his/her name and surname.">
+            <column name="ID" type="BIGINT" autoIncrement="true" remarks="Primary Key of the table.">
+                <constraints primaryKey="true" primaryKeyName="PK_CONTACTS" />
+            </column>
+
+            <column name="SURNAME" type="VARCHAR(255)" remarks="The surname of a contact. This can be null, but its combination with the NAME column cannot be null." />
+            <column name="NAME" type="VARCHAR(255)" remarks="The name of a contact. This can be null, but its combination with the SURNAME column cannot be null." />
+            <column name="IMAGE" type="BLOB" remarks="Bytes of the image." />
+
+            <column name="CREATOR" type="VARCHAR(255)" remarks="Identifier of the person who inserted this contact." />
+            <column name="LAST_UPDATER" type="VARCHAR(255)" remarks="Identifier of the person who updated this contact the last time." />
+            <column name="CREATION_DATE_TIME_UTC" type="DATETIME" remarks="Date-time in UTC of when this contact was created.">
+                <constraints nullable="false" />
+            </column>
+            <column name="LAST_UPDATE_DATE_TIME_UTC" type="DATETIME" remarks="Date-time in UTC of when this contact was updated the last time. This will be used for performing the optimistic locking." />
+
+            <column name="EXTERNAL_ID" type="VARCHAR(36)" remarks="A stable ID which can be exposed outside the database to reference a single contact in a unique way">
+                <constraints nullable="false" unique="true" uniqueConstraintName="UNQ_CONTACTS_EXT_ID" />
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

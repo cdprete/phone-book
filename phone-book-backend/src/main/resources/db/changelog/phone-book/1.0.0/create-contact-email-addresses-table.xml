@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+    <changeSet id="create-contact-email-addresses-table" author="cdprete">
+        <preConditions>
+            <tableExists tableName="CONTACTS" />
+        </preConditions>
+
+        <createTable tableName="CONTACT_EMAIL_ADDRESSES" remarks="The CONTACT_EMAIL_ADDRESSES table will store all the e-mail addresses that a contact owns.">
+            <column name="EMAIL_ADDRESS" type="VARCHAR(255)" remarks="E-mail address of a contact.">
+                <constraints nullable="false" />
+            </column>
+            <column name="CONTACT_ID" type="BIGINT" remarks="ID of the contact this e-mail address belongs to.">
+                <constraints nullable="false" />
+            </column>
+            <column name="TYPE" type="VARCHAR(10)" remarks="Type of the e-mail address.">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+
+        <addPrimaryKey tableName="CONTACT_EMAIL_ADDRESSES" columnNames="CONTACT_ID,EMAIL_ADDRESS" constraintName="PK_CONTACT_EMAIL_ADDRESSES" />
+
+        <addForeignKeyConstraint baseTableName="CONTACT_EMAIL_ADDRESSES"
+                                 baseColumnNames="CONTACT_ID"
+                                 constraintName="FK_CONTACTS_CONTACT_EMAIL_ADDR"
+                                 referencedTableName="CONTACTS"
+                                 referencedColumnNames="ID"
+                                 onUpdate="CASCADE"
+                                 onDelete="CASCADE"
+        />
+
+        <createIndex tableName="CONTACT_EMAIL_ADDRESSES" indexName="IDX_CONT_EMAIL_ADDR_CONTACT_ID">
+            <column name="CONTACT_ID" type="BIGINT" remarks="Unique index on the CONTACT_ID column to speed join operations up." />
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+    <changeSet id="create-contact-phone-numbers-table" author="cdprete">
+        <preConditions>
+            <tableExists tableName="CONTACTS" />
+        </preConditions>
+
+        <createTable tableName="CONTACT_PHONE_NUMBERS" remarks="The CONTACT_PHONE_NUMBERS table will store all the phone numbers that a contact owns.">
+            <column name="PHONE_NUMBER" type="VARCHAR(15)" remarks="Phone number of a contact.">
+                <constraints nullable="false" />
+            </column>
+            <column name="CONTACT_ID" type="BIGINT" remarks="ID of the contact this phone number belongs to.">
+                <constraints nullable="false" />
+            </column>
+            <column name="TYPE" type="VARCHAR(10)" remarks="Type of the phone number.">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+
+        <addPrimaryKey tableName="CONTACT_PHONE_NUMBERS" columnNames="CONTACT_ID,PHONE_NUMBER" constraintName="PK_CONTACT_PHONE_NUMBERS" />
+
+        <addForeignKeyConstraint baseTableName="CONTACT_PHONE_NUMBERS"
+                                 baseColumnNames="CONTACT_ID"
+                                 constraintName="FK_CONTACTS_CONTACT_PHONE_NUMS"
+                                 referencedTableName="CONTACTS"
+                                 referencedColumnNames="ID"
+                                 onUpdate="CASCADE"
+                                 onDelete="CASCADE"
+        />
+
+        <createIndex tableName="CONTACT_PHONE_NUMBERS" indexName="IDX_CONT_PHONE_NUMS_CONTACT_ID">
+            <column name="CONTACT_ID" type="BIGINT" remarks="Unique index on the CONTACT_ID column to speed join operations up." />
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

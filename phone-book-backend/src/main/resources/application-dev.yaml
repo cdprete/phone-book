@@ -1,0 +1,6 @@
+# Minimal datasource configuration.
+# This will create a database in memory named 'phonebook-db' and Liquibase will create the tables into it.
+# To analyse the database, you can go at http://localhost:8080/h2-console and specify the URL below as JDBC URL.
+spring.datasource:
+  driver-class-name: org.h2.Driver
+  url: jdbc:h2:mem:phonebook-db;DB_CLOSE_ON_EXIT=FALSE
