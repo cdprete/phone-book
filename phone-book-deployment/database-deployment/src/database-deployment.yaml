@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: phone-book-database-deployment
+  namespace: phone-book-database
+  labels:
+    app.kubernetes.io/name: phone-book-database
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: phone-book-database-deployment
+  template:
+    metadata:
+      name: phone-book-database-pod
+      namespace: phone-book-database
+      labels:
+        app.kubernetes.io/name: phone-book-database-deployment
+    spec:
+      containers:
+        - name: postgres
+          image: quay.io/bitnami/postgresql:14.2.0-debian-10-r1
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - configMapRef:
+                name: phone-book-database-config-map
+            - secretRef:
+                name: phone-book-database-secret
+          volumeMounts:
+            - name: postgres-data
+              # Use /bitnami instead of /bitnami/postgresql as specified in the docs of the Docker image.
+              # See: https://github.com/bitnami/charts/issues/1210#issuecomment-678759936
+              mountPath: /bitnami
+          livenessProbe:
+            tcpSocket:
+              port: 5432
+          readinessProbe:
+            initialDelaySeconds: 15
+            tcpSocket:
+              port: 5432
+      volumes:
+        - name: postgres-data
+          persistentVolumeClaim:
+            claimName: phone-book-database-persistent-volume-claim

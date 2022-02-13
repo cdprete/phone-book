@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: phone-book-database-service
+  namespace: phone-book-database
+  labels:
+    app.kubernetes.io/name: phone-book-database
+spec:
+  # Switch it back to ClusterIP as soon as the backend is deployed within K8s as well.
+  type: NodePort
+  selector:
+    app.kubernetes.io/name: phone-book-database-deployment
+  ports:
+    - port: 5432
+      nodePort: 32540

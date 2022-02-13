@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: phone-book-database-config-map
+  namespace: phone-book-database
+  labels:
+    app.kubernetes.io/name: phone-book-database
+immutable: true
+data:
+  POSTGRESQL_DATABASE: phone-book-db
+  POSTGRESQL_USERNAME: phone-book-user

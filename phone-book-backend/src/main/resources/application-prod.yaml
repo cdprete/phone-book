@@ -1,0 +1,4 @@
+spring.datasource:
+  username: phone-book-user
+  password: nJ6N#8hT2Px2jD*y
+  url: jdbc:postgresql://localhost:32540/phone-book-db
