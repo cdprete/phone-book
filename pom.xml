@@ -35,11 +35,23 @@
     </modules>
 
     <properties>
+        <!-- %a and %l are placeholders resolved by kubernetes-maven-plugin -->
+        <docker.image-name>%a:%l</docker.image-name>
         <docker.repository-name>docker.io/cdprete</docker.repository-name>
-        <docker.image-name>${project.artifactId}:${project.version}</docker.image-name>
         <docker.qualified-image-name>${docker.repository-name}/${docker.image-name}</docker.qualified-image-name>
 
-        <docker.credentials.username />
-        <docker.credentials.password />
+        <kubernetes-maven-plugin.version>1.6.0</kubernetes-maven-plugin.version>
     </properties>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.eclipse.jkube</groupId>
+                    <artifactId>kubernetes-maven-plugin</artifactId>
+                    <version>${kubernetes-maven-plugin.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 </project>

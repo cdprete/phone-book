@@ -125,59 +125,6 @@
         <pluginManagement>
             <plugins>
                 <plugin>
-                    <groupId>org.codehaus.gmavenplus</groupId>
-                    <artifactId>gmavenplus-plugin</artifactId>
-                    <version>1.13.1</version>
-                    <dependencies>
-                        <dependency>
-                            <groupId>org.codehaus.groovy</groupId>
-                            <artifactId>groovy-all</artifactId>
-                            <version>3.0.9</version>
-                            <type>pom</type>
-                        </dependency>
-                    </dependencies>
-                    <executions>
-                        <execution>
-                            <id>check-if-image-must-be-published</id>
-                            <phase>validate</phase>
-                            <goals>
-                                <goal>execute</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                    <configuration>
-                        <scripts>
-                            <script><![CDATA[
-                                def dockerCredentialsUsernamePropertyName = 'docker.credentials.username'
-                                def dockerCredentialsPasswordPropertyName = 'docker.credentials.password'
-                                def dockerCredentialsUsername = checkPropertyValue(dockerCredentialsUsernamePropertyName)
-                                def dockerCredentialsPassword = checkPropertyValue(dockerCredentialsPasswordPropertyName)
-                                if(!dockerCredentialsUsername || !dockerCredentialsPassword) {
-                                    project.properties['spring-boot.build-image.publish'] = false
-                                }
-
-                                String checkPropertyValue(String name) {
-                                    def value = getPropertyValue(name)
-                                    if(!value)  {
-                                        log.warn "The property '$name' is not set or it's blank, therefore no image will be pushed."
-                                    }
-
-                                    return value
-                                }
-
-                                String getPropertyValue(String name) {
-                                    // property was defined from command line e.g.: -DpropertyName=value
-                                    def value = session.userProperties[name]?.trim()
-                                    if (!value) {
-                                        value = project.properties[name]?.trim()
-                                    }
-                                    return value
-                                }
-                            ]]></script>
-                        </scripts>
-                    </configuration>
-                </plugin>
-                <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${maven-compiler-plugin.version}</version>
@@ -219,23 +166,27 @@
                                 <goal>repackage</goal>
                             </goals>
                         </execution>
-                        <execution>
-                            <id>build-image</id>
-                            <phase>deploy</phase>
-                            <goals>
-                                <goal>build-image</goal>
-                            </goals>
-                            <configuration>
-                                <image>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.eclipse.jkube</groupId>
+                    <artifactId>kubernetes-maven-plugin</artifactId>
+                    <configuration>
+                        <generator>
+                            <config>
+                                <spring-boot>
                                     <name>${docker.qualified-image-name}</name>
-                                </image>
-                                <docker>
-                                    <publishRegistry>
-                                        <username>${docker.credentials.username}</username>
-                                        <password>${docker.credentials.password}</password>
-                                    </publishRegistry>
-                                </docker>
-                            </configuration>
+                                    <registry>${docker.repository-name}</registry>
+                                </spring-boot>
+                            </config>
+                        </generator>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>build</goal>
+                            </goals>
                         </execution>
                     </executions>
                 </plugin>
@@ -243,15 +194,13 @@
         </pluginManagement>
 
         <plugins>
-            <!--
-            <plugin>
-                <groupId>org.codehaus.gmavenplus</groupId>
-                <artifactId>gmavenplus-plugin</artifactId>
-            </plugin>
-            -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.eclipse.jkube</groupId>
+                <artifactId>kubernetes-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
