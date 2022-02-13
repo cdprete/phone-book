@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: phone-book-backend-deployment
+  namespace: phone-book-services
+  labels:
+    app.kubernetes.io/name: phone-book-services
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: phone-book-backend-deployment
+  template:
+    metadata:
+      name: phone-book-backend-pod
+      namespace: phone-book-services
+      labels:
+        app.kubernetes.io/name: phone-book-backend-deployment
+    spec:
+      containers:
+        - name: backend
+          image: docker.io/cdprete/phone-book-backend
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - secretRef:
+                name: phone-book-backend-secret
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: prod
+          livenessProbe:
+            periodSeconds: 30
+            initialDelaySeconds: 15
+            httpGet:
+              port: 8080
+              path: /phone-book/actuator/health/liveness
+          readinessProbe:
+            periodSeconds: 30
+            initialDelaySeconds: 15
+            httpGet:
+              port: 8080
+              path: /phone-book/actuator/health/readiness
+          volumeMounts:
+            - mountPath: /deployments/application-prod.yaml
+              subPath: application-prod.yaml
+              name: application-yaml
+      volumes:
+        - name: application-yaml
+          configMap:
+            name: phone-book-backend-application-yaml

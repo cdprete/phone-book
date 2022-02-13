@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: phone-book-backend-application-yaml
+  namespace: phone-book-services
+  labels:
+    app.kubernetes.io/name: phone-book-services
+immutable: true
+data:
+  application-prod.yaml: |-
+    spring.datasource:
+      username: phone-book-user
+      password: ${DATABASE_PASSWORD}
+      url: jdbc:postgresql://phone-book-database-service.phone-book-database:5432/phone-book-db

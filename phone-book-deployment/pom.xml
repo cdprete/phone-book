@@ -13,5 +13,6 @@
     <packaging>pom</packaging>
     <modules>
         <module>database-deployment</module>
+        <module>backend-deployment</module>
     </modules>
 </project>
