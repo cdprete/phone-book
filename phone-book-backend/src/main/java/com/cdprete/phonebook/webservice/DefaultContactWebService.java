@@ -38,7 +38,7 @@ public class DefaultContactWebService implements ContactWebService {
     private final ContactService contactService;
     private final ConversionService conversionService;
 
-    private static final String HTTP_TOTAL_COUNT_HEADER_NAME = "HTTP-Total-Count";
+    private static final String TOTAL_COUNT_HEADER_NAME = "X-Total-Count";
 
     private static final String BASE_PATH = format("/%s/contacts", API_VERSION);
     private static final String GET_CONTACT_PATH_TEMPLATE = format("%s/%%s", BASE_PATH);
@@ -49,6 +49,7 @@ public class DefaultContactWebService implements ContactWebService {
         this.conversionService = conversionService;
     }
 
+    // TODO make this sortable
     @Override
     public ResponseEntity<Set<@Valid BasicContactRead>> readContacts(Pageable pageable, String searchValue, HttpServletRequest servletRequest) {
         var unsortedPageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
@@ -56,7 +57,7 @@ public class DefaultContactWebService implements ContactWebService {
         var links = linkFactory.fromPaginatedHttpRequest(contactsPage, servletRequest);
 
         return ResponseEntity.ok()
-                .header(HTTP_TOTAL_COUNT_HEADER_NAME, Long.toString(contactsPage.getTotalElements()))
+                .header(TOTAL_COUNT_HEADER_NAME, Long.toString(contactsPage.getTotalElements()))
                 .header(LINK, links.stream().map(Link::toString).collect(joining(", ")))
                 .body(contactsPage.stream().collect(toCollection(LinkedHashSet::new)));
     }
@@ -68,24 +69,28 @@ public class DefaultContactWebService implements ContactWebService {
 
     @Override
     public ResponseEntity<Void> createContact(ContactCreate data, MultipartFile image) {
-        var id = image.isEmpty() ?
-                contactService.createContact(data) :
-                contactService.createContact(data, conversionService.convert(image, Image.class));
+        var id = hasContent(image) ?
+                contactService.createContact(data, conversionService.convert(image, Image.class)) :
+                contactService.createContact(data);
 
         return ResponseEntity.created(URI.create(format(GET_CONTACT_PATH_TEMPLATE, id))).build();
     }
 
     @Override
     public void updateContact(String id, ContactUpdate data, MultipartFile image) {
-        if(image.isEmpty()) {
-            contactService.updateContact(id, data);
-        } else {
+        if(hasContent(image)) {
             contactService.updateContact(id, data, conversionService.convert(image, Image.class));
+        } else {
+            contactService.updateContact(id, data);
         }
     }
 
     @Override
     public void deleteContact(String id) {
         contactService.deleteContact(id);
+    }
+
+    private static boolean hasContent(MultipartFile image) {
+        return image != null && !image.isEmpty();
     }
 }

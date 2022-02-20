@@ -49,7 +49,7 @@ public class LinkFactory {
         return links;
     }
 
-    private URI composeEntireUrl(StringBuffer url, int page, int pageSize) {
+    private URI composeEntireUrl(CharSequence url, int page, int pageSize) {
         //noinspection StringBufferReplaceableByString
         var builder = new StringBuilder(url);
         builder.append('?');

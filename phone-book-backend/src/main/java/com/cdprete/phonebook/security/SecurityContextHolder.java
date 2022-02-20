@@ -6,9 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
-
 import static java.lang.ThreadLocal.withInitial;
+import static java.util.Optional.ofNullable;
 
 /**
  * @author Cosimo Damiano Prete
@@ -28,7 +27,7 @@ public class SecurityContextHolder {
         var oldUserInfo = getUserInfo();
         try {
             if(userInfo == null) {
-                logger.debug("The specified UserInfo is null, therefore the execution will be executed as anonymous user.");
+                logger.debug("The specified {} is null, therefore the execution will be executed as anonymous user.", UserInfo.class.getSimpleName());
             }
             setUserInfo(userInfo);
             exec.run();
@@ -37,8 +36,8 @@ public class SecurityContextHolder {
         }
     }
 
-    private static void setUserInfo(UserInfo userInfo) {
-        SecurityContextHolder.userInfo.set(Optional.ofNullable(userInfo).orElseGet(UserInfoAdapter::getAnonymousUserInfoInstance));
+    private static void setUserInfo(UserInfo aUserInfo) {
+        userInfo.set(ofNullable(aUserInfo).orElseGet(UserInfoAdapter::getAnonymousUserInfoInstance));
     }
 
     @FunctionalInterface

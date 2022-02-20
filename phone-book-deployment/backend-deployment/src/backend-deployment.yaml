@@ -17,11 +17,36 @@ spec:
         app.kubernetes.io/name: phone-book-backend-deployment
     spec:
       containers:
-        - name: backend
-          image: docker.io/cdprete/phone-book-backend
-          imagePullPolicy: IfNotPresent
+        # auth-proxy container configuration (sidecar)
+        - name: auth-proxy
+          image: cdprete/phone-book-auth-proxy
           ports:
             - containerPort: 8080
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: prod
+          livenessProbe:
+            periodSeconds: 30
+            initialDelaySeconds: 15
+            httpGet:
+              port: 8080
+              path: /actuator/health/liveness
+          readinessProbe:
+            periodSeconds: 30
+            initialDelaySeconds: 15
+            httpGet:
+              port: 8080
+              path: /actuator/health/readiness
+          volumeMounts:
+            - mountPath: /home/jboss/config/application-prod.yaml
+              subPath: application-prod.yaml
+              name: auth-proxy-application-yaml
+
+        # backend container configuration
+        - name: backend
+          image: cdprete/phone-book-backend
+          ports:
+            - containerPort: 8081
           envFrom:
             - secretRef:
                 name: phone-book-backend-secret
@@ -32,19 +57,22 @@ spec:
             periodSeconds: 30
             initialDelaySeconds: 15
             httpGet:
-              port: 8080
+              port: 8081
               path: /phone-book/actuator/health/liveness
           readinessProbe:
             periodSeconds: 30
             initialDelaySeconds: 15
             httpGet:
-              port: 8080
+              port: 8081
               path: /phone-book/actuator/health/readiness
           volumeMounts:
-            - mountPath: /deployments/application-prod.yaml
+            - mountPath: /home/jboss/config/application-prod.yaml
               subPath: application-prod.yaml
-              name: application-yaml
+              name: backend-application-yaml
       volumes:
-        - name: application-yaml
+        - name: backend-application-yaml
           configMap:
             name: phone-book-backend-application-yaml
+        - name: auth-proxy-application-yaml
+          configMap:
+            name: phone-book-auth-proxy-application-yaml

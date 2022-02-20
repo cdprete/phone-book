@@ -1,0 +1,27 @@
+spring:
+  # Configuration for the handling of multipart requests.
+  servlet.multipart:
+    # Let the target service deal with the actual size of the request and of the uploaded file(s).
+    max-file-size: -1
+    max-request-size: -1
+
+  # Spring Cloud configuration section.
+  # Disable the loading of remote (a.k.a. externals) configuration mappings since we'll configure them in here in the YAML.
+  cloud.config.enabled: false
+
+# Configuration properties for the application server.
+server:
+  # Make active requests complete before stopping the server when receiving the shutdown signal.
+  shutdown: graceful
+
+  # Configuration properties for the (Netty) embedded application server.
+  servlet:
+    # Disable the support for JSP since we don't need it (it allows a faster startup).
+    jsp.registered: false
+
+# Configuration for the actuator endpoints.
+management:
+  # Show always the components as well as the details for each component.
+  endpoint.health:
+      show-components: always
+      show-details: always

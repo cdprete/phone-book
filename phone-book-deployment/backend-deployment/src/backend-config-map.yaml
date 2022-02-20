@@ -8,7 +8,35 @@ metadata:
 immutable: true
 data:
   application-prod.yaml: |-
+    server.port: 8081
     spring.datasource:
       username: phone-book-user
       password: ${DATABASE_PASSWORD}
       url: jdbc:postgresql://phone-book-database-service.phone-book-database:5432/phone-book-db
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: phone-book-auth-proxy-application-yaml
+  namespace: phone-book-services
+  labels:
+    app.kubernetes.io/name: phone-book-services
+immutable: true
+data:
+  application-prod.yaml: |-
+    spring.cloud.gateway:
+      default-filters:
+      - name: RemoveRequestHeader
+        args:
+        - name: X-Auth-User
+      routes:
+      # Containers within the same Pod can communicate by using localhost
+      - uri: http://localhost:8081
+        predicates:
+        - Path=/phone-book/v*/**
+        filters:
+        - PreserveHostHeader
+        - AuthenticationIdentityPropagator=${spring.cloud.gateway.default-filters[0].args[0].name}
+        - RemoveRequestHeader=Authorization

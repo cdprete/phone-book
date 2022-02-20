@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: postgres
-          image: quay.io/bitnami/postgresql:14.2.0-debian-10-r1
+          image: quay.io/bitnami/postgresql:14
           ports:
             - containerPort: 5432
           envFrom:

@@ -2,10 +2,10 @@ package com.cdprete.phonebook.security;
 
 import com.cdprete.phonebook.api.security.BaseUserInfo;
 import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -17,8 +17,9 @@ import static org.springframework.util.StringUtils.hasText;
  * @since 11/02/2022
  */
 @Component
-class UserInfoExtractorFilter extends HttpFilter {
-    private static final String AUTH_HEADER_NAME = "HTTP-Auth-User";
+class UserInfoExtractorFilter extends OncePerRequestFilter {
+    // TODO make this configurable
+    private static final String AUTH_HEADER_NAME = "X-Auth-User";
 
     private final SecurityContextHolder securityContextHolder;
 
@@ -27,7 +28,7 @@ class UserInfoExtractorFilter extends HttpFilter {
     }
 
     @Override
-    protected void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
         var headerValue = request.getHeader(AUTH_HEADER_NAME);
         if(hasText(headerValue)) {
             try {

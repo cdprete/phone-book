@@ -32,24 +32,115 @@
     <modules>
         <module>phone-book-backend</module>
         <module>phone-book-deployment</module>
+        <module>phone-book-auth-proxy</module>
     </modules>
 
     <properties>
-        <!-- %a and %l are placeholders resolved by kubernetes-maven-plugin -->
-        <docker.image-name>%a:%l</docker.image-name>
+        <docker.image-name>${project.artifactId}</docker.image-name>
         <docker.repository-name>docker.io/cdprete</docker.repository-name>
         <docker.qualified-image-name>${docker.repository-name}/${docker.image-name}</docker.qualified-image-name>
 
-        <kubernetes-maven-plugin.version>1.6.0</kubernetes-maven-plugin.version>
+        <dockerfile-maven-plugin.version>1.4.9</dockerfile-maven-plugin.version>
+
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <java.version>17</java.version>
+
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+        <maven.compiler.release>${java.version}</maven.compiler.release>
+        <maven.compiler.parameters>true</maven.compiler.parameters>
+
+        <maven-deploy-plugin.version>3.0.0-M2</maven-deploy-plugin.version>
+        <maven-jar-plugin.version>3.2.2</maven-jar-plugin.version>
+
+        <spring-boot.version>2.6.3</spring-boot.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <pluginManagement>
             <plugins>
                 <plugin>
-                    <groupId>org.eclipse.jkube</groupId>
-                    <artifactId>kubernetes-maven-plugin</artifactId>
-                    <version>${kubernetes-maven-plugin.version}</version>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <version>${spring-boot.version}</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>repackage</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>com.spotify</groupId>
+                    <artifactId>dockerfile-maven-plugin</artifactId>
+                    <version>${dockerfile-maven-plugin.version}</version>
+                    <configuration>
+                        <repository>${docker.qualified-image-name}</repository>
+                        <buildArgs>
+                            <JAR_NAME>${project.build.finalName}</JAR_NAME>
+                            <JAVA_VERSION>${java.version}</JAVA_VERSION>
+                        </buildArgs>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>build-${docker.image-name}-docker-image</id>
+                            <goals>
+                                <goal>build</goal>
+                            </goals>
+                            <configuration>
+                                <squash>true</squash>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>tag-${docker.image-name}-docker-image</id>
+                            <goals>
+                                <goal>tag</goal>
+                            </goals>
+                            <configuration>
+                                <tag>${project.version}</tag>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>${maven-jar-plugin.version}</version>
+                    <configuration>
+                        <excludes>
+                            <!-- Avoid packaging development configurations in the final JAR. -->
+                            <exclude>application-dev.yml</exclude>
+                            <exclude>application-dev.yaml</exclude>
+                            <exclude>application-dev.properties</exclude>
+                        </excludes>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>${maven-deploy-plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <!-- Skip the default deploy of the JARs since we don't have a Maven registry where to publish them -->
+                            <id>default-deploy</id>
+                            <phase>none</phase>
+                        </execution>
+                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>

@@ -4,3 +4,6 @@
 spring.datasource:
   driver-class-name: org.h2.Driver
   url: jdbc:h2:mem:phonebook-db;DB_CLOSE_ON_EXIT=FALSE
+
+# Change the port on which this server will run so that the auth-proxy server can run in front of it with the port 8080.
+server.port: 8081

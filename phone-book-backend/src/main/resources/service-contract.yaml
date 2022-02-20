@@ -15,6 +15,10 @@ paths:
   /contacts:
     get:
       summary: Gets the contacts the logged-in user has access to.
+      description: |-
+        Gets the contacts the logged-in user has access to.
+        
+        The logged-in user is extracted from the `Authorization` header that must be present in the request.
       tags:
         - contacts
       parameters:
@@ -25,8 +29,8 @@ paths:
         200:
           description: List of the fetched contacts.
           headers:
-            HTTP-Total-Count:
-              $ref: '#/components/headers/HTTP-Total-Count'
+            X-Total-Count:
+              $ref: '#/components/headers/X-Total-Count'
             Link:
               $ref: '#/components/headers/Link'
           content:
@@ -43,6 +47,10 @@ paths:
           $ref: '#/components/responses/403'
     post:
       summary: Creates a new contact in the phone book of the logged-in user.
+      description: |-
+        Creates a new contact in the phone book of the logged-in user.
+        
+        The logged-in user is extracted from the `Authorization` header that must be present in the request.
       tags:
         - contacts
       requestBody:
@@ -71,7 +79,11 @@ paths:
           $ref: '#/components/responses/403'
   /contacts/{id}:
     get:
-      summary: Gets a single contact.
+      summary: Gets a single contact for the logged-in user.
+      description: |-
+        Gets a single contact for the logged-in user.
+        
+        The logged-in user is extracted from the `Authorization` header that must be present in the request.
       tags:
         - contacts
       parameters:
@@ -92,7 +104,11 @@ paths:
         404:
           $ref: '#/components/responses/404'
     put:
-      summary: Updates the contact with the new provided informtion.
+      summary: Updates a logged-in user's contact with the new provided informtion.
+      description:
+        Updates a logged-in user's contact with the new provided informtion.
+        
+        The logged-in user is extracted from the `Authorization` header that must be present in the request.
       tags:
         - contacts
       parameters:
@@ -121,7 +137,11 @@ paths:
         404:
           $ref: '#/components/responses/404'
     delete:
-      summary: Deletes the specified contact.
+      summary: Deletes the logged-in user's specified contact.
+      description: |-
+        Deletes the logged-in user's specified contact.
+        
+        The logged-in user is extracted from the `Authorization` header that must be present in the request.
       tags:
         - contacts
       parameters:
@@ -155,7 +175,7 @@ paths:
 
 components:
   headers:
-    HTTP-Total-Count:
+    X-Total-Count:
       description: Total number of items present in the system for the specified request.
       required: true
       schema:

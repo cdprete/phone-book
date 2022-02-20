@@ -14,7 +14,9 @@
             <column name="NAME" type="VARCHAR(255)" remarks="The name of a contact. This can be null, but its combination with the SURNAME column cannot be null." />
             <column name="IMAGE" type="BLOB" remarks="Bytes of the image." />
 
-            <column name="CREATOR" type="VARCHAR(255)" remarks="Identifier of the person who inserted this contact." />
+            <column name="CREATOR" type="VARCHAR(255)" remarks="Identifier of the person who inserted this contact.">
+                <constraints nullable="false" />
+            </column>
             <column name="LAST_UPDATER" type="VARCHAR(255)" remarks="Identifier of the person who updated this contact the last time." />
             <column name="CREATION_DATE_TIME_UTC" type="DATETIME" remarks="Date-time in UTC of when this contact was created.">
                 <constraints nullable="false" />

@@ -1,7 +1,6 @@
 package com.cdprete.phonebook.security;
 
 import com.cdprete.phonebook.api.security.UserInfo;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.context.annotation.RequestScope;
@@ -18,10 +17,5 @@ class SecurityConfig {
     @RequestScope(proxyMode = INTERFACES)
     UserInfo userInfo() {
         return SecurityContextHolder.getUserInfo();
-    }
-
-    @Bean
-    FilterRegistrationBean<UserInfoExtractorFilter> userInfoExtractorFilterFilterBean(SecurityContextHolder securityContextHolder) {
-        return new FilterRegistrationBean<>(new UserInfoExtractorFilter(securityContextHolder));
     }
 }
