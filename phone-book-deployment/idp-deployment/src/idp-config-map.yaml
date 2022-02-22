@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: phone-book-idp-application-yaml
+  namespace: phone-book-security
+  labels:
+    app.kubernetes.io/name: phone-book-security
+immutable: true
+data:
+  application-prod.yaml: |-
+    spring.datasource:
+      username: phone-book-idp-user
+      password: ${DATABASE_PASSWORD}
+      url: jdbc:postgresql://phone-book-database-service.phone-book-database:5432/phone-book-idp-db

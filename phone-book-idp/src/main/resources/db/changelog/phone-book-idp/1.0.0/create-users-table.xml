@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+    <changeSet id="create-users-table" author="cdprete">
+        <createTable tableName="USERS" remarks="The USERS table will store the authentication details for every user.">
+            <column name="USERNAME" type="VARCHAR(255)" remarks="The username of a user logging into the system.">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK_USERS" />
+            </column>
+            <column name="PASSWORD" type="VARCHAR(255)" remarks="The encrypted password of a user logging into the system.">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

@@ -2,6 +2,8 @@ package com.cdprete.phonebook.authproxy.security;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.web.server.ServerWebExchange;
@@ -9,6 +11,11 @@ import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
+import java.text.ParseException;
+
+import static com.cdprete.phonebook.authproxy.security.JwtTokenUtils.extractRolesFromToken;
+import static com.cdprete.phonebook.authproxy.security.JwtTokenUtils.parseToken;
+import static java.util.stream.Collectors.toUnmodifiableSet;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.security.core.context.ReactiveSecurityContextHolder.withSecurityContext;
 import static reactor.core.publisher.Mono.defer;
@@ -32,12 +39,18 @@ class PreAuthenticatedJwtWebFilter implements WebFilter {
 
         var token = request.getHeaders().getFirst(AUTHORIZATION);
         return ReactiveSecurityContextHolder.getContext().switchIfEmpty(defer(() -> {
-            var authentication = new PreAuthenticatedJwtAuthenticationToken(token);
-            var securityContext = new SecurityContextImpl(authentication);
+            try {
+                var jwt = parseToken(token);
+                var authorities = extractRolesFromToken(jwt).stream().map(SimpleGrantedAuthority::new).collect(toUnmodifiableSet());
+                var authentication = new PreAuthenticatedJwtAuthenticationToken(authorities, jwt);
+                var securityContext = new SecurityContextImpl(authentication);
 
-            return chain.filter(exchange)
-                    .contextWrite(context -> context.putAll(withSecurityContext(just(securityContext)).readOnly()))
-                    .then(empty());
+                return chain.filter(exchange)
+                        .contextWrite(context -> context.putAll(withSecurityContext(just(securityContext)).readOnly()))
+                        .then(empty());
+            } catch (ParseException e) {
+                throw new BadCredentialsException(e.toString(), e);
+            }
         })).flatMap((securityContext) -> chain.filter(exchange));
     }
 }

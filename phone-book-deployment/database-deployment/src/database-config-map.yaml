@@ -7,5 +7,29 @@ metadata:
     app.kubernetes.io/name: phone-book-database
 immutable: true
 data:
+  # Data for the phone-book main database
   POSTGRESQL_DATABASE: phone-book-db
   POSTGRESQL_USERNAME: phone-book-user
+  # Data for the database used by the IdP
+  PHONE_BOOK_IDP_DATABASE: phone-book-idp-db
+  PHONE_BOOK_IDP_USERNAME: phone-book-idp-user
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: phone-book-idp-db-config-map
+  namespace: phone-book-database
+  labels:
+    app.kubernetes.io/name: phone-book-database
+immutable: true
+data:
+  init-idp-db.sh: |-
+    #!/bin/bash
+    set -e
+    psql -v ON_ERROR_STOP=1 --username "postgres" --dbname "postgres" <<-EOSQL
+      CREATE USER "$PHONE_BOOK_IDP_USERNAME" WITH PASSWORD '$PHONE_BOOK_IDP_PASSWORD';
+      CREATE DATABASE "$PHONE_BOOK_IDP_DATABASE";
+      GRANT ALL PRIVILEGES ON DATABASE "$PHONE_BOOK_IDP_DATABASE" TO "$PHONE_BOOK_IDP_USERNAME";
+    EOSQL

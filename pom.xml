@@ -33,6 +33,7 @@
         <module>phone-book-backend</module>
         <module>phone-book-deployment</module>
         <module>phone-book-auth-proxy</module>
+        <module>phone-book-idp</module>
     </modules>
 
     <properties>
@@ -55,6 +56,8 @@
         <maven-deploy-plugin.version>3.0.0-M2</maven-deploy-plugin.version>
         <maven-jar-plugin.version>3.2.2</maven-jar-plugin.version>
 
+        <esapi.version>2.2.3.1</esapi.version>
+        <nimbus-jose-jwt.version>9.19</nimbus-jose-jwt.version>
         <spring-boot.version>2.6.3</spring-boot.version>
     </properties>
 
@@ -66,6 +69,12 @@
                 <version>${spring-boot.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>com.nimbusds</groupId>
+                <artifactId>nimbus-jose-jwt</artifactId>
+                <version>${nimbus-jose-jwt.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -102,9 +111,6 @@
                             <goals>
                                 <goal>build</goal>
                             </goals>
-                            <configuration>
-                                <squash>true</squash>
-                            </configuration>
                         </execution>
                         <execution>
                             <id>tag-${docker.image-name}-docker-image</id>

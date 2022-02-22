@@ -1,17 +1,17 @@
 package com.cdprete.phonebook.authproxy.security;
 
 import com.nimbusds.jwt.JWT;
-import com.nimbusds.jwt.SignedJWT;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticatedPrincipal;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.util.Assert;
 
 import java.text.ParseException;
+import java.util.Set;
 
-import static java.util.Collections.singleton;
+import static com.cdprete.phonebook.authproxy.security.JwtTokenUtils.extractSubjectFromToken;
 
 /**
  * A pre-authenticated {@link Authentication} object which extracts the required information from the provided JWT token.
@@ -30,22 +30,14 @@ import static java.util.Collections.singleton;
  * @since 19/02/2022
  */
 class PreAuthenticatedJwtAuthenticationToken extends AbstractAuthenticationToken {
-    // FIXME extract this from the token
-    static final String EXPECTED_AUTHORITY = "USER";
-
     private final JWT jwt;
 
-    public PreAuthenticatedJwtAuthenticationToken(String token) {
-        // FIXME See Javadoc at the beginning on why this is hardcoded.
-        super(singleton(new SimpleGrantedAuthority(EXPECTED_AUTHORITY)));
-        Assert.hasText(token, "The JWT token can't be blank");
+    public PreAuthenticatedJwtAuthenticationToken(Set<? extends GrantedAuthority> authorities, JWT token) {
+        super(authorities);
+        Assert.notNull(token, "The JWT token can't be null");
 
         // FIXME See Javadoc at the beginning on why the signature is not verified.
-        try {
-            jwt = SignedJWT.parse(token);
-        } catch (ParseException e) {
-            throw new BadCredentialsException(e.toString(), e);
-        }
+        jwt = token;
         setAuthenticated(true);
     }
 
@@ -58,7 +50,7 @@ class PreAuthenticatedJwtAuthenticationToken extends AbstractAuthenticationToken
     public AuthenticatedPrincipal getPrincipal() {
         return () -> {
             try {
-                return jwt.getJWTClaimsSet().getSubject();
+                return extractSubjectFromToken(jwt);
             } catch (ParseException e) {
                 throw new BadCredentialsException(e.toString(), e);
             }

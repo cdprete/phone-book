@@ -33,7 +33,7 @@
         />
 
         <createIndex tableName="CONTACT_PHONE_NUMBERS" indexName="IDX_CONT_PHONE_NUMS_CONTACT_ID">
-            <column name="CONTACT_ID" type="BIGINT" remarks="Unique index on the CONTACT_ID column to speed join operations up." />
+            <column name="CONTACT_ID" type="BIGINT" remarks="Index on the CONTACT_ID column to speed join operations up." />
         </createIndex>
     </changeSet>
 </databaseChangeLog>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+    <changeSet id="create-user-roles-table" author="cdprete">
+        <preConditions>
+            <and>
+                <tableExists tableName="USERS" />
+                <tableExists tableName="ROLES" />
+            </and>
+        </preConditions>
+        <createTable tableName="USER_ROLES" remarks="The USER_ROLES table maps every user with the roles he/she has assigned.">
+            <column name="USERNAME" type="VARCHAR(255)" remarks="The username of a user">
+                <constraints nullable="false" />
+            </column>
+            <column name="ROLE" type="VARCHAR(255)" remarks="A role">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+
+        <addPrimaryKey tableName="USER_ROLES" columnNames="USERNAME,ROLE" constraintName="PK_USER_ROLES" />
+
+        <addForeignKeyConstraint baseTableName="USER_ROLES"
+                                 baseColumnNames="USERNAME"
+                                 constraintName="FK_USER_ROLES_USERS"
+                                 referencedTableName="USERS"
+                                 referencedColumnNames="USERNAME"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE" />
+
+        <createIndex tableName="USER_ROLES" indexName="IDX_USER_ROLES_USERNAME">
+            <column name="USERNAME" type="VARCHAR(255)" remarks="Index on the USERNAME column to speed join operations up." />
+        </createIndex>
+
+        <addForeignKeyConstraint baseTableName="USER_ROLES"
+                                 baseColumnNames="ROLE"
+                                 constraintName="FK_USER_ROLES_ROLES"
+                                 referencedTableName="ROLES"
+                                 referencedColumnNames="ROLE"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE" />
+
+        <createIndex tableName="USER_ROLES" indexName="IDX_USER_ROLES_ROLE">
+            <column name="ROLE" type="VARCHAR(255)" remarks="Index on the ROLE column to speed join operations up." />
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: phone-book-idp-deployment
+  namespace: phone-book-security
+  labels:
+    app.kubernetes.io/name: phone-book-security
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: phone-book-idp-deployment
+  template:
+    metadata:
+      name: phone-book-idp-pod
+      namespace: phone-book-security
+      labels:
+        app.kubernetes.io/name: phone-book-idp-deployment
+    spec:
+      containers:
+        - name: idp
+          image: cdprete/phone-book-idp
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - secretRef:
+                name: phone-book-idp-secret
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: prod
+          livenessProbe:
+            periodSeconds: 30
+            initialDelaySeconds: 15
+            httpGet:
+              port: 8080
+              path: /auth/actuator/health/liveness
+          readinessProbe:
+            periodSeconds: 30
+            initialDelaySeconds: 15
+            httpGet:
+              port: 8080
+              path: /auth/actuator/health/readiness
+          volumeMounts:
+            - mountPath: /home/jboss/config/application-prod.yaml
+              subPath: application-prod.yaml
+              name: idp-application-yaml
+      volumes:
+        - name: idp-application-yaml
+          configMap:
+            name: phone-book-idp-application-yaml
