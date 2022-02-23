@@ -6,8 +6,9 @@ spring.cloud.gateway:
     args:
     - name: X-Auth-User
   routes:
-  # URL to which the request should be forwarded
-  - uri: http://localhost:8081
+  - id: backend-core
+    # URL to which the request should be forwarded
+    uri: http://localhost:8081
     predicates:
     # Routes to the contacts web service
     - Path=/phone-book/v*/**
@@ -20,3 +21,14 @@ spring.cloud.gateway:
     - AuthenticationIdentityPropagator=${spring.cloud.gateway.default-filters[0].args[0].name}
     # Do not propagate further the Authorization header
     - RemoveRequestHeader=Authorization
+  - id: backend-actuator
+    uri: http://localhost:8081
+    predicates:
+      # Routes to the contacts web service
+      - Path=/phone-book/actuator/**
+    filters:
+      # Preserve the original host in the request (so the one of the proxy, i.e. localhost:8080) instead of setting the
+      # one of the target service (so, the one of the backend service, i.e. localhost:8081).
+      - PreserveHostHeader
+      # Do not propagate further the Authorization header
+      - RemoveRequestHeader=Authorization

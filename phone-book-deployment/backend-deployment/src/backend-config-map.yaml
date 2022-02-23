@@ -28,15 +28,21 @@ data:
   application-prod.yaml: |-
     spring.cloud.gateway:
       default-filters:
+      - PreserveHostHeader
+      - RemoveRequestHeader=Authorization
       - name: RemoveRequestHeader
         args:
         - name: X-Auth-User
       routes:
       # Containers within the same Pod can communicate by using localhost
-      - uri: http://localhost:8081
+      - id: backend-core
+        uri: http://localhost:8081
         predicates:
-        - Path=/phone-book/**
+        - Path=/phone-book/v*/**
         filters:
-        - PreserveHostHeader
-        - AuthenticationIdentityPropagator=${spring.cloud.gateway.default-filters[0].args[0].name}
-        - RemoveRequestHeader=Authorization
+        - AuthenticationIdentityPropagator=${spring.cloud.gateway.default-filters[2].args[0].name}
+      - id: backend-actuator
+        uri: http://localhost:8081
+        predicates:
+        - Path=/phone-book/actuator/**
+        

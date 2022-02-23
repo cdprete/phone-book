@@ -4,3 +4,5 @@
 spring.datasource:
   driver-class-name: org.h2.Driver
   url: jdbc:h2:mem:phone-book-idp-db;DB_CLOSE_ON_EXIT=FALSE
+# Change the server port to something else not already used by the other components.
+server.port: 8082
