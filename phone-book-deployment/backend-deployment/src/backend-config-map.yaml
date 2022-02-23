@@ -35,7 +35,7 @@ data:
       # Containers within the same Pod can communicate by using localhost
       - uri: http://localhost:8081
         predicates:
-        - Path=/phone-book/v*/**
+        - Path=/phone-book/**
         filters:
         - PreserveHostHeader
         - AuthenticationIdentityPropagator=${spring.cloud.gateway.default-filters[0].args[0].name}

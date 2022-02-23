@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: phone-book-backend-ingress
+  namespace: phone-book-services
+  labels:
+    app.kubernetes.io/name: phone-book-services
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /phone-book
+            pathType: Prefix
+            backend:
+              service:
+                name: phone-book-backend-service
+                port:
+                  number: 8080

@@ -6,10 +6,7 @@ metadata:
   labels:
     app.kubernetes.io/name: phone-book-services
 spec:
-  # Switch it back to ClusterIP as soon as the Ingress is defined.
-  type: NodePort
   selector:
     app.kubernetes.io/name: phone-book-backend-deployment
   ports:
     - port: 8080
-      nodePort: 30808
