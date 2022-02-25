@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: phone-book-ui-deployment
+  namespace: phone-book-client
+  labels:
+    app.kubernetes.io/name: phone-book-client
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: phone-book-ui-deployment
+  template:
+    metadata:
+      name: phone-book-ui-pod
+      namespace: phone-book-client
+      labels:
+        app.kubernetes.io/name: phone-book-ui-deployment
+    spec:
+      containers:
+        - name: ui
+          image: cdprete/phone-book-ui
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            periodSeconds: 30
+            initialDelaySeconds: 15
+            httpGet:
+              port: 8080
+              path: /index.html
+          readinessProbe:
+            periodSeconds: 30
+            initialDelaySeconds: 15
+            httpGet:
+              port: 8080
+              path: /index.html

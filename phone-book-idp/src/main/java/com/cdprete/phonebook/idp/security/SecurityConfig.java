@@ -7,7 +7,11 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.cors.CorsConfiguration;
 
+import static java.time.Duration.ofMinutes;
+import static org.springframework.http.HttpHeaders.ORIGIN;
+import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 /**
@@ -27,7 +31,20 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         // Disable the whole security which is automatically initiated since we add the PasswordEncoder to the context.
         http
                 .httpBasic().disable()
-                .cors().disable()
+                .cors().configurationSource(request -> {
+                    // CORS is by default not allowed, which would not allow us to run the UI locally and contact this
+                    // server. With this configuration we're enabling it, but a bit stricter than the default "safe"
+                    // config provided by Spring Boot at org.springframework.web.cors.CorsConfiguration.applyPermitDefaultValues
+                    var config = new CorsConfiguration();
+                    config.setAllowCredentials(true);
+                    // In the IdP we've only POST requests
+                    config.addAllowedMethod(POST);
+                    config.addAllowedOrigin(request.getHeader(ORIGIN));
+                    config.setMaxAge(ofMinutes(30));
+                    request.getHeaderNames().asIterator().forEachRemaining(config::addAllowedHeader);
+
+                    return config;
+                }).and()
                 .csrf().disable()
                 .formLogin().disable()
                 .logout().disable()

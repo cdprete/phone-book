@@ -34,6 +34,7 @@
         <module>phone-book-deployment</module>
         <module>phone-book-auth-proxy</module>
         <module>phone-book-idp</module>
+        <module>phone-book-ui</module>
     </modules>
 
     <properties>

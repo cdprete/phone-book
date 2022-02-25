@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: phone-book-ui-service
+  namespace: phone-book-client
+  labels:
+    app.kubernetes.io/name: phone-book-client
+spec:
+  selector:
+    app.kubernetes.io/name: phone-book-ui-deployment
+  ports:
+    - port: 8080

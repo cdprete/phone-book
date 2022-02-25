@@ -15,5 +15,6 @@
         <module>database-deployment</module>
         <module>backend-deployment</module>
         <module>idp-deployment</module>
+        <module>ui-deployment</module>
     </modules>
 </project>
