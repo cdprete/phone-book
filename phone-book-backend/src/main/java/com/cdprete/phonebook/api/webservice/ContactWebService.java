@@ -6,22 +6,13 @@ import com.cdprete.phonebook.api.dto.ContactRead;
 import com.cdprete.phonebook.api.dto.ContactUpdate;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import java.io.IOException;
 import java.util.Set;
 
 import static com.cdprete.phonebook.utils.Constants.API_VERSION;
@@ -52,10 +43,18 @@ public interface ContactWebService {
     ResponseEntity<Void> createContact(@RequestPart @Valid ContactCreate data,
                                        @RequestPart(required = false) MultipartFile image);
 
+    @ResponseStatus(CREATED)
+    @PostMapping(consumes = APPLICATION_JSON_VALUE)
+    ResponseEntity<Void> createContact(@RequestBody @Valid ContactCreate data);
+
     @ResponseStatus(NO_CONTENT)
     @PutMapping(value = "/{id}", consumes = MULTIPART_FORM_DATA_VALUE)
     void updateContact(@PathVariable @NotBlank String id, @RequestPart @Valid ContactUpdate data,
-                       @RequestPart(required = false) MultipartFile image) throws IOException;
+                       @RequestPart(required = false) MultipartFile image);
+
+    @ResponseStatus(NO_CONTENT)
+    @PutMapping(value = "/{id}", consumes = APPLICATION_JSON_VALUE)
+    void updateContact(@PathVariable @NotBlank String id, @RequestBody @Valid ContactUpdate data);
 
     @DeleteMapping(value = "/{id}")
     void deleteContact(@PathVariable @NotBlank String id);

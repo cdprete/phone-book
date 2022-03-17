@@ -4,8 +4,8 @@ import com.cdprete.phonebook.api.dto.BasicContactRead;
 import com.cdprete.phonebook.api.dto.ContactCreate;
 import com.cdprete.phonebook.api.dto.ContactRead;
 import com.cdprete.phonebook.api.dto.ContactUpdate;
+import com.cdprete.phonebook.api.service.ContactImageService.Image;
 import com.cdprete.phonebook.api.service.ContactService;
-import com.cdprete.phonebook.api.service.ContactService.Image;
 import com.cdprete.phonebook.api.webservice.ContactWebService;
 import com.cdprete.phonebook.utils.links.Link;
 import com.cdprete.phonebook.utils.links.LinkFactory;
@@ -77,6 +77,11 @@ public class DefaultContactWebService implements ContactWebService {
     }
 
     @Override
+    public ResponseEntity<Void> createContact(ContactCreate data) {
+        return createContact(data, null);
+    }
+
+    @Override
     public void updateContact(String id, ContactUpdate data, MultipartFile image) {
         if(hasContent(image)) {
             contactService.updateContact(id, data, conversionService.convert(image, Image.class));
@@ -85,12 +90,17 @@ public class DefaultContactWebService implements ContactWebService {
         }
     }
 
+    private static boolean hasContent(MultipartFile image) {
+        return image != null && !image.isEmpty();
+    }
+
+    @Override
+    public void updateContact(String id, ContactUpdate data) {
+        updateContact(id, data, null);
+    }
+
     @Override
     public void deleteContact(String id) {
         contactService.deleteContact(id);
-    }
-
-    private static boolean hasContent(MultipartFile image) {
-        return image != null && !image.isEmpty();
     }
 }

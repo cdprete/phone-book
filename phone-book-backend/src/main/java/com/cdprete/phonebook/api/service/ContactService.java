@@ -4,12 +4,12 @@ import com.cdprete.phonebook.api.dto.BasicContactRead;
 import com.cdprete.phonebook.api.dto.ContactCreate;
 import com.cdprete.phonebook.api.dto.ContactRead;
 import com.cdprete.phonebook.api.dto.ContactUpdate;
+import com.cdprete.phonebook.api.service.ContactImageService.Image;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -35,11 +35,4 @@ public interface ContactService {
     void updateContact(@NotBlank String id, @NotNull @Valid ContactUpdate data);
 
     void deleteContact(@NotBlank String id);
-
-    record Image(@NotNull @NotEmpty byte[] bytes, @NotBlank String mediaType) {
-        public Image(byte[] bytes, String mediaType) {
-            this.bytes = bytes;
-            this.mediaType = mediaType;
-        }
-    }
 }

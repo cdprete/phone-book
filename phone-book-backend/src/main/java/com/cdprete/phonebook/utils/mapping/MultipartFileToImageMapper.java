@@ -1,6 +1,6 @@
 package com.cdprete.phonebook.utils.mapping;
 
-import com.cdprete.phonebook.api.service.ContactService.Image;
+import com.cdprete.phonebook.api.service.ContactImageService.Image;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.core.convert.converter.Converter;

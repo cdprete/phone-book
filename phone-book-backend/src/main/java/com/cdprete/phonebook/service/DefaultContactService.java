@@ -1,26 +1,18 @@
 package com.cdprete.phonebook.service;
 
-import com.cdprete.phonebook.api.dto.BasicContactRead;
-import com.cdprete.phonebook.api.dto.ContactCreate;
-import com.cdprete.phonebook.api.dto.ContactRead;
-import com.cdprete.phonebook.api.dto.ContactUpdate;
-import com.cdprete.phonebook.api.dto.EmailAddress;
-import com.cdprete.phonebook.api.dto.PhoneNumber;
+import com.cdprete.phonebook.api.dto.*;
+import com.cdprete.phonebook.api.security.UserInfo;
+import com.cdprete.phonebook.api.service.ContactImageService;
+import com.cdprete.phonebook.api.service.ContactImageService.Image;
 import com.cdprete.phonebook.api.service.ContactService;
-import com.cdprete.phonebook.exceptions.ContactNotFoundException;
-import com.cdprete.phonebook.exceptions.DuplicateEmailAddressesException;
-import com.cdprete.phonebook.exceptions.DuplicatePhoneNumbersException;
-import com.cdprete.phonebook.exceptions.MissingNameAndSurnameException;
-import com.cdprete.phonebook.exceptions.NotAnImageException;
+import com.cdprete.phonebook.exceptions.*;
 import com.cdprete.phonebook.persistence.entities.ContactEntity;
 import com.cdprete.phonebook.persistence.repository.ContactRepository;
 import com.cdprete.phonebook.utils.mapping.ContactUpdateToContactEntityMapper;
-import com.cdprete.phonebook.api.security.UserInfo;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -32,7 +24,6 @@ import java.util.function.Function;
 
 import static java.util.stream.Collectors.toSet;
 import static org.springframework.context.annotation.ScopedProxyMode.INTERFACES;
-import static org.springframework.http.MediaType.parseMediaType;
 import static org.springframework.util.CollectionUtils.isEmpty;
 import static org.springframework.util.StringUtils.hasText;
 
@@ -44,20 +35,21 @@ import static org.springframework.util.StringUtils.hasText;
 @Scope(proxyMode = INTERFACES)
 @Transactional(readOnly = true)
 public class DefaultContactService implements ContactService {
-    private static final MediaType IMAGE_ALL_MEDIA_TYPE = parseMediaType("image/*");
-
     private final UserInfo loggedInUser;
     private final ContactRepository repository;
     private final ConversionService conversionService;
+    private final ContactImageService contactImageService;
     private final ContactUpdateToContactEntityMapper contactUpdateMapper;
 
     public DefaultContactService(UserInfo loggedInUser,
                                  ContactRepository repository,
                                  ConversionService conversionService,
+                                 ContactImageService contactImageService,
                                  ContactUpdateToContactEntityMapper contactUpdateMapper) {
         this.loggedInUser = loggedInUser;
         this.repository = repository;
         this.conversionService = conversionService;
+        this.contactImageService = contactImageService;
         this.contactUpdateMapper = contactUpdateMapper;
     }
 
@@ -87,9 +79,10 @@ public class DefaultContactService implements ContactService {
 
         var entity = conversionService.convert(contactData, ContactEntity.class);
         Assert.notNull(entity, "The converted entity cannot be null");
-        setImageToEntity(image, entity);
+        var id = repository.save(entity).getExternalId();
+        contactImageService.uploadContactImage(id, image);
 
-        return repository.save(entity).getExternalId();
+        return id;
     }
 
     @Override
@@ -107,9 +100,9 @@ public class DefaultContactService implements ContactService {
 
         var entity = repository.findByCreatorAndExternalId(loggedInUser.getUsername(), id).orElseThrow(() -> new ContactNotFoundException(id));
         contactUpdateMapper.updateContactEntityFromDto(updatedContactData, entity);
-        setImageToEntity(image, entity);
-
         repository.save(entity);
+
+        contactImageService.uploadContactImage(id, image);
     }
 
     @Override
@@ -142,26 +135,9 @@ public class DefaultContactService implements ContactService {
         }
     }
 
-    private static void ensureDataMediaTypeIsImage(String mediaType) {
-        if(!IMAGE_ALL_MEDIA_TYPE.isCompatibleWith(parseMediaType(mediaType))) {
-            throw new NotAnImageException(mediaType);
-        }
-    }
-
     private static void ensurePartialNameIsAvailable(String name, String surname) {
         if(!hasText(name) && !hasText(surname)) {
             throw new MissingNameAndSurnameException();
         }
-    }
-
-    private static void setImageToEntity(Image image, ContactEntity entity) {
-        final byte[] imageBytes;
-        if(image == null) {
-            imageBytes = null;
-        } else {
-            ensureDataMediaTypeIsImage(image.mediaType());
-            imageBytes = image.bytes();
-        }
-        entity.setImage(imageBytes);
     }
 }
