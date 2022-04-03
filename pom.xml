@@ -41,8 +41,10 @@
         <docker.image-name>${project.artifactId}</docker.image-name>
         <docker.repository-name>docker.io/cdprete</docker.repository-name>
         <docker.qualified-image-name>${docker.repository-name}/${docker.image-name}</docker.qualified-image-name>
-
-        <dockerfile-maven-plugin.version>1.4.9</dockerfile-maven-plugin.version>
+        <!-- Use the release version as soon as https://github.com/eclipse/jkube/issues/1382 it's released. -->
+        <!-- Install the plugin locally until it's released. -->
+        <!-- The code to use is at https://github.com/rohanKanojia/jkube/tree/pr/issue1382 -->
+        <jkube-maven-plugin.version>1.8.0-SNAPSHOT</jkube-maven-plugin.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -59,7 +61,7 @@
 
         <esapi.version>2.2.3.1</esapi.version>
         <nimbus-jose-jwt.version>9.19</nimbus-jose-jwt.version>
-        <spring-boot.version>2.6.3</spring-boot.version>
+        <spring-boot.version>2.6.6</spring-boot.version>
     </properties>
 
     <dependencyManagement>
@@ -96,30 +98,33 @@
                     </executions>
                 </plugin>
                 <plugin>
-                    <groupId>com.spotify</groupId>
-                    <artifactId>dockerfile-maven-plugin</artifactId>
-                    <version>${dockerfile-maven-plugin.version}</version>
-                    <configuration>
-                        <repository>${docker.qualified-image-name}</repository>
-                        <buildArgs>
-                            <JAR_NAME>${project.build.finalName}</JAR_NAME>
-                            <JAVA_VERSION>${java.version}</JAVA_VERSION>
-                        </buildArgs>
-                    </configuration>
+                    <groupId>org.eclipse.jkube</groupId>
+                    <artifactId>kubernetes-maven-plugin</artifactId>
+                    <version>${jkube-maven-plugin.version}</version>
                     <executions>
                         <execution>
                             <id>build-${docker.image-name}-docker-image</id>
+                            <phase>package</phase>
                             <goals>
                                 <goal>build</goal>
                             </goals>
-                        </execution>
-                        <execution>
-                            <id>tag-${docker.image-name}-docker-image</id>
-                            <goals>
-                                <goal>tag</goal>
-                            </goals>
                             <configuration>
-                                <tag>${project.version}</tag>
+                                <images>
+                                    <image>
+                                        <name>${docker.qualified-image-name}</name>
+                                        <build>
+                                            <tags>${project.version}</tags>
+                                            <contextDir>${project.basedir}</contextDir>
+                                            <assembly>
+                                                <name>./</name>
+                                            </assembly>
+                                            <args>
+                                                <JAR_NAME>${project.build.finalName}</JAR_NAME>
+                                                <JAVA_VERSION>${java.version}</JAVA_VERSION>
+                                            </args>
+                                        </build>
+                                    </image>
+                                </images>
                             </configuration>
                         </execution>
                     </executions>

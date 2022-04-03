@@ -6,15 +6,20 @@ import org.springframework.cloud.gateway.config.GatewayProperties;
 import org.springframework.cloud.gateway.handler.predicate.PathRoutePredicateFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+import org.springframework.context.annotation.Scope;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.authentication.HttpStatusServerEntryPoint;
 import org.springframework.util.Assert;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.reactive.CorsConfigurationSource;
 
-import static java.lang.String.format;
+import java.util.Optional;
+
 import static java.time.Duration.ofMinutes;
+import static org.springframework.context.annotation.ScopedProxyMode.INTERFACES;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import static org.springframework.security.config.web.server.SecurityWebFiltersOrder.AUTHENTICATION;
 import static org.springframework.web.cors.CorsConfiguration.ALL;
@@ -32,24 +37,19 @@ class SecurityConfig {
     private static final String BACKEND_ACTUATOR_API_ROUTE_ID = "backend-actuator";
 
     @Bean
-    SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http, GatewayProperties gatewayProperties, PathRoutePredicateFactory pathRoutePredicateFactory) {
+    SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http,
+                                                  GatewayProperties gatewayProperties,
+                                                  PathRoutePredicateFactory pathRoutePredicateFactory,
+                                                  @SuppressWarnings("OptionalUsedAsFieldOrParameterType") Optional<CorsConfigurationSource> corsConfigurationSource) {
         http
                 // Basic Auth is always prohibited
-                .httpBasic().authenticationEntryPoint(new HttpStatusServerEntryPoint(UNAUTHORIZED)).and()
-                .cors().configurationSource(exchange -> {
-                    // CORS is by default not allowed, which would not allow us to run the UI locally and contact this
-                    // server.
-                    var config = new CorsConfiguration();
-                    //config.setAllowCredentials(true);
-                    config.addAllowedMethod(ALL);
-                    //var allowedOrigin = ofNullable(exchange.getRequest().getHeaders().getOrigin()).or(() -> ofNullable(exchange.getRequest().getHeaders().getFirst("Referer"))).orElse(ALL);
-                    config.addAllowedOrigin(ALL);
-                    config.setMaxAge(ofMinutes(30));
-                    //exchange.getRequest().getHeaders().keySet().forEach(config::addAllowedHeader);
-                    config.addAllowedHeader(ALL);
-                    config.addExposedHeader(ALL);
-                    return config;
-                }).and()
+                .httpBasic().authenticationEntryPoint(new HttpStatusServerEntryPoint(UNAUTHORIZED));
+        if (corsConfigurationSource.isPresent()) {
+            http.cors().configurationSource(corsConfigurationSource.get());
+        } else {
+            http.cors().disable();
+        }
+        http
                 .csrf().disable()
                 .formLogin().disable()
                 .logout().disable()
@@ -63,12 +63,28 @@ class SecurityConfig {
         return http.build();
     }
 
+    @Bean
+    @Profile("dev")
+    @Scope(proxyMode = INTERFACES)
+    CorsConfigurationSource devCorsConfiguration() {
+        return exchange -> {
+            // CORS is by default not allowed, which would not allow us to run the UI locally and contact this server.
+            var config = new CorsConfiguration();
+            config.addAllowedMethod(ALL);
+            config.addAllowedOrigin(ALL);
+            config.setMaxAge(ofMinutes(30));
+            config.addAllowedHeader(ALL);
+            config.addExposedHeader(ALL);
+            return config;
+        };
+    }
+
     private static String[] getAllPathsForRoute(GatewayProperties props, String filterName, String routeId) {
         var paths = props.getRoutes().stream().filter(r -> r.getId().equals(routeId)).flatMap(r -> r.getPredicates().stream().filter(p -> p.getName().equals(filterName)).flatMap(p -> p.getArgs().values().stream())).toArray(String[]::new);
-        Assert.state(paths.length > 0, format("""
+        Assert.state(paths.length > 0, """
                 No paths have been found for the route ID '%s'.\
                 Please check the configuration so that the expected paths are mapped under the specified route ID
-                """, routeId));
+                """.formatted(routeId));
 
         return paths;
     }
