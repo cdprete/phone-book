@@ -10,6 +10,10 @@ spring:
     # Don't let the HTTP session keep the database session (Open Session in View pattern).
     # This is an anti-pattern. More is explained at https://vladmihalcea.com/the-open-session-in-view-anti-pattern/
     open-in-view: false
+    # To use the single 'hibernate_sequence' sequence as with Hibernate < 6.0.
+    # See: https://docs.jboss.org/hibernate/orm/6.0/migration-guide/migration-guide.html#id-sequence-table-name
+    properties:
+      hibernate.id.db_structure_naming_strategy: legacy
 
   # Pagination configuration for Spring (Boot) Data.
   data.web.pageable:

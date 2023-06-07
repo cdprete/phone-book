@@ -1,6 +1,7 @@
 package com.cdprete.phonebook.api.dto;
 
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
+
 import java.io.Serializable;
 import java.util.Objects;
 

@@ -4,15 +4,15 @@ import com.cdprete.phonebook.api.dto.BasicContactRead;
 import com.cdprete.phonebook.api.dto.ContactCreate;
 import com.cdprete.phonebook.api.dto.ContactRead;
 import com.cdprete.phonebook.api.dto.ContactUpdate;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import java.util.Set;
 
 import static com.cdprete.phonebook.utils.Constants.API_VERSION;

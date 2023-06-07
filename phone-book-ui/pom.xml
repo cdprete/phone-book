@@ -13,9 +13,6 @@
     <artifactId>phone-book-ui</artifactId>
 
     <properties>
-        <maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>
-        <exec-maven-plugin.version>3.0.0</exec-maven-plugin.version>
-
         <flutter-build-runner.base-command>pub run build_runner</flutter-build-runner.base-command>
         <flutter-build-runner.skip-clean>true</flutter-build-runner.skip-clean>
         <flutter-build-runner.build-command>build</flutter-build-runner.build-command>
@@ -54,7 +51,6 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
-                <version>${exec-maven-plugin.version}</version>
                 <configuration>
                     <executable>flutter</executable>
                     <workingDirectory>${project.build.sourceDirectory}</workingDirectory>

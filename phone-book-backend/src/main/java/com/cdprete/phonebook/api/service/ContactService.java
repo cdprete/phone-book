@@ -5,12 +5,11 @@ import com.cdprete.phonebook.api.dto.ContactCreate;
 import com.cdprete.phonebook.api.dto.ContactRead;
 import com.cdprete.phonebook.api.dto.ContactUpdate;
 import com.cdprete.phonebook.api.service.ContactImageService.Image;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-
-import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 
 /**
  * @author Cosimo Damiano Prete

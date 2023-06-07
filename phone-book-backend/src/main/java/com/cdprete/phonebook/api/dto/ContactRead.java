@@ -1,6 +1,7 @@
 package com.cdprete.phonebook.api.dto;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
+
 import java.io.Serial;
 import java.util.Set;
 

@@ -2,8 +2,8 @@ package com.cdprete.phonebook.idp.exceptions;
 
 import org.springframework.http.HttpStatus;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import static java.lang.String.format;
 import static org.springframework.http.HttpStatus.CONFLICT;

@@ -1,6 +1,6 @@
 package com.cdprete.phonebook.api.security;
 
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 
 /**
  * @author Cosimo Damiano Prete
