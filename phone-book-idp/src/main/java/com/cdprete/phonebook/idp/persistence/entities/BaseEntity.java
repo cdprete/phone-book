@@ -2,7 +2,7 @@ package com.cdprete.phonebook.idp.persistence.entities;
 
 import org.springframework.data.domain.Persistable;
 
-import javax.persistence.Transient;
+import jakarta.persistence.Transient;
 import java.util.Objects;
 
 /**

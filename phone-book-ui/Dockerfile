@@ -1,4 +1,4 @@
-ARG NGINX_VERSION=1.21.6
+ARG NGINX_VERSION=1.25
 FROM bitnami/nginx:$NGINX_VERSION
 LABEL org.opencontainers.image.authors="cosimo.prete.damiano@gmail.com"
 

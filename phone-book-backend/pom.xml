@@ -12,11 +12,9 @@
     <description>Backend for the phone book application written in Spring Boot.</description>
 
     <properties>
-        <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
-
-        <libphonenumber.version>8.12.42</libphonenumber.version>
-        <mapstruct.version>1.4.2.Final</mapstruct.version>
-        <mapstruct-spring-extensions.version>0.1.1</mapstruct-spring-extensions.version>
+        <libphonenumber.version>8.13.13</libphonenumber.version>
+        <mapstruct.version>1.5.5.Final</mapstruct.version>
+        <mapstruct-spring-extensions.version>1.0.1</mapstruct-spring-extensions.version>
     </properties>
 
     <dependencyManagement>
@@ -118,7 +116,6 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>${maven-compiler-plugin.version}</version>
                     <configuration>
                         <annotationProcessorPaths>
                             <path>

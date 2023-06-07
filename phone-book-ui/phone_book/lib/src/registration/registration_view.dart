@@ -6,6 +6,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:phone_book/src/di/injector.dart';
 import 'package:phone_book/src/registration/bloc/registration_bloc.dart';
 
+@RoutePage(name: "RegistrationViewRoute")
 class RegistrationView extends StatefulWidget {
   const RegistrationView({Key? key}) : super(key: key);
 

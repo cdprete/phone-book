@@ -7,6 +7,7 @@ import 'package:phone_book/src/di/injector.dart';
 import 'package:phone_book/src/infrastructure/app_router.dart';
 import 'package:phone_book/src/login/bloc/login_bloc.dart';
 
+@RoutePage(name: "LoginViewRoute")
 class LoginView extends StatefulWidget {
   const LoginView({Key? key}) : super(key: key);
 

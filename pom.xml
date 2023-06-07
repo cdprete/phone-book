@@ -41,10 +41,7 @@
         <docker.image-name>${project.artifactId}</docker.image-name>
         <docker.repository-name>docker.io/cdprete</docker.repository-name>
         <docker.qualified-image-name>${docker.repository-name}/${docker.image-name}</docker.qualified-image-name>
-        <!-- Use the release version as soon as https://github.com/eclipse/jkube/issues/1382 it's released. -->
-        <!-- Install the plugin locally until it's released. -->
-        <!-- The code to use is at https://github.com/rohanKanojia/jkube/tree/pr/issue1382 -->
-        <jkube-maven-plugin.version>1.8.0-SNAPSHOT</jkube-maven-plugin.version>
+        <jkube-maven-plugin.version>1.12.0</jkube-maven-plugin.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -56,12 +53,13 @@
         <maven.compiler.release>${java.version}</maven.compiler.release>
         <maven.compiler.parameters>true</maven.compiler.parameters>
 
-        <maven-deploy-plugin.version>3.0.0-M2</maven-deploy-plugin.version>
-        <maven-jar-plugin.version>3.2.2</maven-jar-plugin.version>
+        <esapi.version>2.5.2.0</esapi.version>
+        <nimbus-jose-jwt.version>9.31</nimbus-jose-jwt.version>
+        <spring-boot.version>3.1.0</spring-boot.version>
 
-        <esapi.version>2.2.3.1</esapi.version>
-        <nimbus-jose-jwt.version>9.19</nimbus-jose-jwt.version>
-        <spring-boot.version>2.6.6</spring-boot.version>
+        <exec-maven-plugin.version>3.1.0</exec-maven-plugin.version>
+        <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
+        <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -132,7 +130,6 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>${maven-jar-plugin.version}</version>
                     <configuration>
                         <excludes>
                             <!-- Avoid packaging development configurations in the final JAR. -->
@@ -145,7 +142,6 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-deploy-plugin</artifactId>
-                    <version>${maven-deploy-plugin.version}</version>
                     <executions>
                         <execution>
                             <!-- Skip the default deploy of the JARs since we don't have a Maven registry where to publish them -->
@@ -153,6 +149,21 @@
                             <phase>none</phase>
                         </execution>
                     </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven-compiler-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>exec-maven-plugin</artifactId>
+                    <version>${exec-maven-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>${maven-resources-plugin.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>

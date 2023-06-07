@@ -7,9 +7,14 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.Scope;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
+import org.springframework.security.config.annotation.web.configurers.FormLoginConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer.FrameOptionsConfig;
+import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
@@ -25,7 +30,7 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
  */
 @Configuration
 @EnableWebSecurity
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
+public class SecurityConfig {
     @Autowired(required = false)
     private CorsConfigurationSource corsConfigurationSource;
 
@@ -34,23 +39,25 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return new BCryptPasswordEncoder();
     }
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    @Bean
+    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         // Disable the whole security which is automatically initiated since we add the PasswordEncoder to the context.
-        http.httpBasic().disable();
+        http.httpBasic(AbstractHttpConfigurer::disable);
         if (corsConfigurationSource == null) {
-            http.cors().disable();
+            http.cors(AbstractHttpConfigurer::disable);
         } else {
-            http.cors().configurationSource(corsConfigurationSource);
+            http.cors(c -> c.configurationSource(corsConfigurationSource));
         }
         http
-                .csrf().disable()
-                .formLogin().disable()
-                .logout().disable()
-                // Allow frames (for H2 Web console)
-                .headers().frameOptions().disable().and()
-                .sessionManagement().sessionCreationPolicy(STATELESS).and()
-                .authorizeRequests().anyRequest().permitAll();
+                .csrf(CsrfConfigurer::disable)
+                .formLogin(FormLoginConfigurer::disable)
+                .logout(LogoutConfigurer::disable)
+                // Allow frame(for H2 Web console)
+                .headers(hc -> hc.frameOptions(FrameOptionsConfig::disable))
+                .sessionManagement(smc -> smc.sessionCreationPolicy(STATELESS))
+                .authorizeHttpRequests(rc -> rc.anyRequest().permitAll());
+
+        return http.build();
     }
 
     @Bean

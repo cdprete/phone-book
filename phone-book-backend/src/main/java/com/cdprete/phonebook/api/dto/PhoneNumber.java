@@ -2,7 +2,7 @@ package com.cdprete.phonebook.api.dto;
 
 import com.cdprete.phonebook.utils.validation.TelephoneNumber;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
 

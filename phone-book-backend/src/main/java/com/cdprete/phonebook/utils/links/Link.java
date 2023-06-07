@@ -2,7 +2,7 @@ package com.cdprete.phonebook.utils.links;
 
 import org.hibernate.validator.constraints.URL;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.net.URI;
 
 import static java.lang.String.format;

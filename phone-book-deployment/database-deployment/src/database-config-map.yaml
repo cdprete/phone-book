@@ -28,7 +28,7 @@ data:
   init-idp-db.sh: |-
     #!/bin/bash
     set -e
-    psql -v ON_ERROR_STOP=1 --username "postgres" --dbname "postgres" <<-EOSQL
+    PGPASSWORD="$POSTGRESQL_POSTGRES_PASSWORD" psql -v ON_ERROR_STOP=1 --username "postgres" --dbname "postgres" <<-EOSQL
       CREATE USER "$PHONE_BOOK_IDP_USERNAME" WITH PASSWORD '$PHONE_BOOK_IDP_PASSWORD';
       CREATE DATABASE "$PHONE_BOOK_IDP_DATABASE";
       GRANT ALL PRIVILEGES ON DATABASE "$PHONE_BOOK_IDP_DATABASE" TO "$PHONE_BOOK_IDP_USERNAME";

@@ -10,12 +10,17 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.Scope;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.config.web.server.ServerHttpSecurity.CorsSpec;
+import org.springframework.security.config.web.server.ServerHttpSecurity.CsrfSpec;
+import org.springframework.security.config.web.server.ServerHttpSecurity.FormLoginSpec;
+import org.springframework.security.config.web.server.ServerHttpSecurity.LogoutSpec;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.authentication.HttpStatusServerEntryPoint;
 import org.springframework.util.Assert;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsConfigurationSource;
 
+import java.beans.Customizer;
 import java.util.Optional;
 
 import static java.time.Duration.ofMinutes;
@@ -43,22 +48,30 @@ class SecurityConfig {
                                                   @SuppressWarnings("OptionalUsedAsFieldOrParameterType") Optional<CorsConfigurationSource> corsConfigurationSource) {
         http
                 // Basic Auth is always prohibited
-                .httpBasic().authenticationEntryPoint(new HttpStatusServerEntryPoint(UNAUTHORIZED));
+                .httpBasic(c -> c.authenticationEntryPoint(new HttpStatusServerEntryPoint(UNAUTHORIZED)));
         if (corsConfigurationSource.isPresent()) {
-            http.cors().configurationSource(corsConfigurationSource.get());
+            http.cors(c -> c.configurationSource(corsConfigurationSource.get()));
         } else {
-            http.cors().disable();
+            http.cors(CorsSpec::disable);
         }
         http
-                .csrf().disable()
-                .formLogin().disable()
-                .logout().disable()
+                .csrf(CsrfSpec::disable)
+                .formLogin(FormLoginSpec::disable)
+                .logout(LogoutSpec::disable)
                 .addFilterAfter(new PreAuthenticatedJwtWebFilter(), AUTHENTICATION)
-                .authorizeExchange()
-                // TODO make these two properly configurable
-                .pathMatchers(getAllPathsForRoute(gatewayProperties, pathRoutePredicateFactory.name(), BACKEND_CORE_API_ROUTE_ID)).hasAuthority(EXPECTED_AUTHORITY).pathMatchers(getAllPathsForRoute(gatewayProperties, pathRoutePredicateFactory.name(), BACKEND_ACTUATOR_API_ROUTE_ID)).permitAll()
-                // Allow the access to the health endpoint for the readiness and liveness checks
-                .matchers(EndpointRequest.to(HealthEndpoint.class)).permitAll().anyExchange().permitAll();
+                .authorizeExchange(exc -> {
+                    // TODO make these two properly configurable
+                    exc
+                            .pathMatchers(getAllPathsForRoute(gatewayProperties, pathRoutePredicateFactory.name(), BACKEND_CORE_API_ROUTE_ID))
+                            .hasAuthority(EXPECTED_AUTHORITY)
+                            .pathMatchers(getAllPathsForRoute(gatewayProperties, pathRoutePredicateFactory.name(), BACKEND_ACTUATOR_API_ROUTE_ID))
+                            .permitAll()
+                            // Allow the access to the health endpoint for the readiness and liveness checks
+                            .matchers(EndpointRequest.to(HealthEndpoint.class))
+                            .permitAll()
+                            .anyExchange()
+                            .permitAll();
+                });
 
         return http.build();
     }

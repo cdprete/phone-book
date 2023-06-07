@@ -9,6 +9,8 @@ import com.cdprete.phonebook.api.service.ContactService;
 import com.cdprete.phonebook.api.webservice.ContactWebService;
 import com.cdprete.phonebook.utils.links.Link;
 import com.cdprete.phonebook.utils.links.LinkFactory;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,8 +18,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
 import java.net.URI;
 import java.util.LinkedHashSet;
 import java.util.Set;
