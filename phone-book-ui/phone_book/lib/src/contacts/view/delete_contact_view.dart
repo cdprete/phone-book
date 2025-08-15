@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:phone_book/localization/app_localizations.dart';
 
 class DeleteContactView extends StatelessWidget {
-  const DeleteContactView({Key? key}) : super(key: key);
+  const DeleteContactView({super.key});
 
   @override
   Widget build(BuildContext context) {

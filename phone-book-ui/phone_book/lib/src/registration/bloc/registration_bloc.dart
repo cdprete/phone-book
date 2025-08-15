@@ -46,7 +46,7 @@ class RegistrationBloc extends Bloc<RegistrationEvent, RegistrationState> {
     ));
   }
 
-  AuthError _mapException(Exception e, StackTrace s) => e is DioError
+  AuthError _mapException(Exception e, StackTrace s) => e is DioException
       ? e.response?.statusCode == 409
           ? const AuthError.userAlreadyRegistered()
           : AuthError.unexpectedError(

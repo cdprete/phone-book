@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
@@ -21,8 +20,8 @@ class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
   final ContactsApi _contactsApi;
 
   ContactsBloc(ContactsApi contactsApi)
-      : _contactsApi = contactsApi,
-        super(const ContactsState()) {
+    : _contactsApi = contactsApi,
+      super(const ContactsState()) {
     on<ContactsEventFetchContacts>(_onFetchContacts);
     on<ContactsEventFetchContact>(_onFetchContact);
     on<ContactsEventStartCreateContact>(_onStartCreateContact);
@@ -43,23 +42,29 @@ class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
     ContactsEventSelectImage event,
     Emitter<ContactsState> emit,
   ) async {
-    emit(state.copyWith(
-      selectContactImage:
-          const _SelectContactImage(isSelectingContactImage: true),
-    ));
+    emit(
+      state.copyWith(
+        selectContactImage: const _SelectContactImage(
+          isSelectingContactImage: true,
+        ),
+      ),
+    );
 
     final result = await pickImage(event.maxSize);
 
     return result.fold(
-      (err) => emit(state.copyWith(
-        selectContactImage: _SelectContactImage(error: some(err)),
-      )),
+      (err) => emit(
+        state.copyWith(
+          selectContactImage: _SelectContactImage(error: some(err)),
+        ),
+      ),
       (img) => emit(
         state.copyWith(
           selectContactImage: _SelectContactImage(contactImage: optionOf(img)),
           fetchSingleContact: state.fetchSingleContact.copyWith(
-            contact: state.fetchSingleContact.contact
-                .map((c) => c.copyWith(image: img)),
+            contact: state.fetchSingleContact.contact.map(
+              (c) => c.copyWith(image: img),
+            ),
           ),
         ),
       ),
@@ -74,28 +79,34 @@ class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
     ContactsEventDeleteContact event,
     Emitter<ContactsState> emit,
   ) async {
-    emit(state.copyWith(
-      deleteContact: const _DeleteContact(isDeletingContact: true),
-    ));
+    emit(
+      state.copyWith(
+        deleteContact: const _DeleteContact(isDeletingContact: true),
+      ),
+    );
 
     try {
       await _contactsApi.deleteContact(event.id);
 
-      emit(state.copyWith(
-        deleteContact: const _DeleteContact(deleteContactSuccess: true),
-        fetchSingleContact: _FetchSingleContact(contact: none()),
-      ));
+      emit(
+        state.copyWith(
+          deleteContact: const _DeleteContact(deleteContactSuccess: true),
+          fetchSingleContact: _FetchSingleContact(contact: none()),
+        ),
+      );
       emit(state.copyWith(deleteContact: const _DeleteContact()));
     } on Exception catch (e, s) {
-      emit(state.copyWith(
-        deleteContact: _DeleteContact(
-          error: some(await _mapException(e, s, _mapDeleteContactException)),
+      emit(
+        state.copyWith(
+          deleteContact: _DeleteContact(
+            error: some(await _mapException(e, s, _mapDeleteContactException)),
+          ),
         ),
-      ));
+      );
     }
   }
 
-  ContactsError _mapDeleteContactException(DioError e, StackTrace s) {
+  ContactsError _mapDeleteContactException(DioException e, StackTrace s) {
     switch (e.response?.statusCode) {
       case 401:
         return const ContactsError.unauthenticated();
@@ -106,7 +117,7 @@ class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
     return _toFallbackError(e, s);
   }
 
-  ContactsError _toFallbackError(DioError e, StackTrace s) =>
+  ContactsError _toFallbackError(DioException e, StackTrace s) =>
       ContactsError.unexpectedError(
         message: e.response?.data?.toString(),
         stacktrace: s,
@@ -120,9 +131,11 @@ class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
     ContactsEventFetchContacts event,
     Emitter<ContactsState> emit,
   ) async {
-    emit(state.copyWith(
-      fetchContacts: const _FetchContacts(isFetchingContacts: true),
-    ));
+    emit(
+      state.copyWith(
+        fetchContacts: const _FetchContacts(isFetchingContacts: true),
+      ),
+    );
 
     try {
       final fetchResult = await _contactsApi.getContacts(
@@ -131,20 +144,21 @@ class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
         searchValue: event.searchValue,
       );
 
-      emit(state.copyWith(
-        fetchContacts: _FetchContacts(
-          contactsPage: _mapFetchToPage(
-            event.page,
-            fetchResult,
+      emit(
+        state.copyWith(
+          fetchContacts: _FetchContacts(
+            contactsPage: _mapFetchToPage(event.page, fetchResult),
           ),
         ),
-      ));
+      );
     } on Exception catch (e, s) {
-      return emit(state.copyWith(
-        fetchContacts: _FetchContacts(
-          error: some(await _mapException(e, s, _mapFetchContactsException)),
+      return emit(
+        state.copyWith(
+          fetchContacts: _FetchContacts(
+            error: some(await _mapException(e, s, _mapFetchContactsException)),
+          ),
         ),
-      ));
+      );
     }
   }
 
@@ -162,17 +176,17 @@ class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
   FutureOr<ContactsError> _mapException(
     Exception e,
     StackTrace s,
-    FutureOr<ContactsError> Function(DioError, StackTrace) mapDioError,
-  ) async =>
-      e is DioError
-          ? await mapDioError.call(e, s)
-          : ContactsError.unexpectedError(message: e.toString(), stacktrace: s);
+    FutureOr<ContactsError> Function(DioException, StackTrace) mapDioError,
+  ) async => e is DioException
+      ? await mapDioError.call(e, s)
+      : ContactsError.unexpectedError(message: e.toString(), stacktrace: s);
 
   FutureOr<ContactsError> _mapFetchContactsException(
-          DioError e, StackTrace s) =>
-      e.response?.statusCode == 401
-          ? const ContactsError.unauthenticated()
-          : _toFallbackError(e, s);
+    DioException e,
+    StackTrace s,
+  ) => e.response?.statusCode == 401
+      ? const ContactsError.unauthenticated()
+      : _toFallbackError(e, s);
 
   void fetchContact(String id) {
     add(ContactsEvent.fetchContact(id));
@@ -182,27 +196,34 @@ class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
     ContactsEventFetchContact event,
     Emitter<ContactsState> emit,
   ) async {
-    emit(state.copyWith(
-      fetchSingleContact: const _FetchSingleContact(
-        isFetchingSingleContact: true,
+    emit(
+      state.copyWith(
+        fetchSingleContact: const _FetchSingleContact(
+          isFetchingSingleContact: true,
+        ),
       ),
-    ));
+    );
 
     try {
       final contact = await _contactsApi.getContact(event.id);
 
-      emit(state.copyWith(
-        fetchSingleContact: _FetchSingleContact(contact: some(contact)),
-      ));
+      emit(
+        state.copyWith(
+          fetchSingleContact: _FetchSingleContact(contact: some(contact)),
+        ),
+      );
     } on Exception catch (e, s) {
-      emit(state.copyWith(
-        fetchSingleContact: _FetchSingleContact(
-            error: some(await _mapException(e, s, _mapFetchContactException))),
-      ));
+      emit(
+        state.copyWith(
+          fetchSingleContact: _FetchSingleContact(
+            error: some(await _mapException(e, s, _mapFetchContactException)),
+          ),
+        ),
+      );
     }
   }
 
-  ContactsError _mapFetchContactException(DioError e, StackTrace s) {
+  ContactsError _mapFetchContactException(DioException e, StackTrace s) {
     switch (e.response?.statusCode) {
       case 401:
         return const ContactsError.unauthenticated();
@@ -221,9 +242,11 @@ class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
     ContactsEventStartCreateContact event,
     Emitter<ContactsState> emit,
   ) {
-    emit(state.copyWith(
-      createContact: const _CreateContact(isCreatingContact: true),
-    ));
+    emit(
+      state.copyWith(
+        createContact: const _CreateContact(isCreatingContact: true),
+      ),
+    );
   }
 
   void createContact(Contact contact) {
@@ -234,12 +257,14 @@ class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
     ContactsEventCreateContact event,
     Emitter<ContactsState> emit,
   ) async {
-    emit(state.copyWith(
-      createContact: const _CreateContact(
-        isCreatingContact: true,
-        isSubmittingContactCreation: true,
+    emit(
+      state.copyWith(
+        createContact: const _CreateContact(
+          isCreatingContact: true,
+          isSubmittingContactCreation: true,
+        ),
       ),
-    ));
+    );
 
     try {
       final result = await _contactsApi.createContact(event.contact);
@@ -254,22 +279,29 @@ class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
         );
       }
 
-      emit(state.copyWith(
-        createContact: const _CreateContact(createContactSuccess: true),
-      ));
+      emit(
+        state.copyWith(
+          createContact: const _CreateContact(createContactSuccess: true),
+        ),
+      );
       fetchContact(id);
       abortContactCreation();
     } on Exception catch (e, s) {
-      emit(state.copyWith(
-        createContact: _CreateContact(
-          isCreatingContact: true,
-          error: some(await _mapException(e, s, _mapCreateContactException)),
+      emit(
+        state.copyWith(
+          createContact: _CreateContact(
+            isCreatingContact: true,
+            error: some(await _mapException(e, s, _mapCreateContactException)),
+          ),
         ),
-      ));
+      );
     }
   }
 
-  FutureOr<ContactsError> _mapCreateContactException(DioError e, StackTrace s) {
+  FutureOr<ContactsError> _mapCreateContactException(
+    DioException e,
+    StackTrace s,
+  ) {
     switch (e.response?.statusCode) {
       case 400:
         return _extractErrorFromBadRequest(e, s);
@@ -288,10 +320,12 @@ class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
     ContactsEventAbortContactCreation event,
     Emitter<ContactsState> emit,
   ) {
-    emit(state.copyWith(
-      createContact: const _CreateContact(),
-      selectContactImage: const _SelectContactImage(),
-    ));
+    emit(
+      state.copyWith(
+        createContact: const _CreateContact(),
+        selectContactImage: const _SelectContactImage(),
+      ),
+    );
   }
 
   void startEditContact(Contact contact) {
@@ -302,9 +336,9 @@ class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
     ContactsEventStartEditContact event,
     Emitter<ContactsState> emit,
   ) {
-    emit(state.copyWith(
-      editContact: const _EditContact(isEditingContact: true),
-    ));
+    emit(
+      state.copyWith(editContact: const _EditContact(isEditingContact: true)),
+    );
   }
 
   void editContact(Contact contact) {
@@ -315,12 +349,14 @@ class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
     ContactsEventEditContact event,
     Emitter<ContactsState> emit,
   ) async {
-    emit(state.copyWith(
-      editContact: const _EditContact(
-        isEditingContact: true,
-        isSubmittingContactEdit: true,
+    emit(
+      state.copyWith(
+        editContact: const _EditContact(
+          isEditingContact: true,
+          isSubmittingContactEdit: true,
+        ),
       ),
-    ));
+    );
 
     try {
       await _contactsApi.updateContact(id: event.id, contact: event.contact);
@@ -331,23 +367,29 @@ class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
         );
       }
 
-      emit(state.copyWith(
-        editContact: const _EditContact(editContactSuccess: true),
-      ));
+      emit(
+        state.copyWith(
+          editContact: const _EditContact(editContactSuccess: true),
+        ),
+      );
       fetchContact(event.id);
       abortContactEditing();
     } on Exception catch (e, s) {
-      emit(state.copyWith(
-        editContact: _EditContact(
-          isEditingContact: true,
-          error: some(await _mapException(e, s, _mapEditContactException)),
+      emit(
+        state.copyWith(
+          editContact: _EditContact(
+            isEditingContact: true,
+            error: some(await _mapException(e, s, _mapEditContactException)),
+          ),
         ),
-      ));
+      );
     }
   }
 
-  FutureOr<ContactsError> _mapEditContactException(DioError e, StackTrace s) =>
-      _mapCreateContactException(e, s);
+  FutureOr<ContactsError> _mapEditContactException(
+    DioException e,
+    StackTrace s,
+  ) => _mapCreateContactException(e, s);
 
   void abortContactEditing() {
     add(const ContactsEvent.abortContactEditing());
@@ -357,18 +399,22 @@ class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
     ContactsEventAbortContactEditing event,
     Emitter<ContactsState> emit,
   ) {
-    emit(state.copyWith(
-      editContact: const _EditContact(),
-      selectContactImage: const _SelectContactImage(),
-    ));
+    emit(
+      state.copyWith(
+        editContact: const _EditContact(),
+        selectContactImage: const _SelectContactImage(),
+      ),
+    );
   }
 
   FutureOr<ContactsError> _extractErrorFromBadRequest(
-    DioError e,
+    DioException e,
     StackTrace s,
   ) async {
     final errorResponse = await compute(
-        ErrorResponse.fromJson, e.response!.data as Map<String, dynamic>);
+      ErrorResponse.fromJson,
+      e.response!.data as Map<String, dynamic>,
+    );
     switch (errorResponse.code) {
       case 'duplicate.email.addresses':
         return const ContactsError.duplicateEmailAddress();
@@ -389,7 +435,7 @@ class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
 }
 
 @freezed
-class Page<T> with _$Page<T> {
+sealed class Page<T> with _$Page<T> {
   static const firstPageNumber = 1;
 
   const factory Page({

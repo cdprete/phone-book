@@ -1,10 +1,8 @@
 package com.cdprete.phonebook.idp.security;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
-import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.*;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -28,21 +26,19 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
  * @author Cosimo Damiano Prete
  * @since 22/02/2022
  */
-@Configuration
 @EnableWebSecurity
+@Configuration(proxyBeanMethods = false)
 public class SecurityConfig {
-    @Autowired(required = false)
-    private CorsConfigurationSource corsConfigurationSource;
-
     @Bean
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
     @Bean
-    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain filterChain(HttpSecurity http, ObjectProvider<CorsConfigurationSource> corsConfigurationSources) throws Exception {
         // Disable the whole security which is automatically initiated since we add the PasswordEncoder to the context.
         http.httpBasic(AbstractHttpConfigurer::disable);
+        CorsConfigurationSource corsConfigurationSource = corsConfigurationSources.getIfAvailable();
         if (corsConfigurationSource == null) {
             http.cors(AbstractHttpConfigurer::disable);
         } else {
@@ -61,6 +57,7 @@ public class SecurityConfig {
     }
 
     @Bean
+    @Primary
     @Profile("dev")
     @Scope(proxyMode = INTERFACES)
     CorsConfigurationSource devCorsConfiguration() {

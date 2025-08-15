@@ -2,13 +2,14 @@ import 'package:another_flushbar/flushbar_helper.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:phone_book/localization/app_localizations.dart';
+import 'package:phone_book/src/api/auth_api.dart';
 import 'package:phone_book/src/di/injector.dart';
 import 'package:phone_book/src/registration/bloc/registration_bloc.dart';
 
 @RoutePage(name: "RegistrationViewRoute")
 class RegistrationView extends StatefulWidget {
-  const RegistrationView({Key? key}) : super(key: key);
+  const RegistrationView({super.key});
 
   @override
   _RegistrationViewState createState() => _RegistrationViewState();
@@ -34,9 +35,7 @@ class _RegistrationViewState extends State<RegistrationView> {
             color: Theme.of(context).primaryColor.withAlpha(100),
             child: Center(
               child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth: constraints.maxWidth / 2,
-                ),
+                constraints: BoxConstraints(maxWidth: constraints.maxWidth / 2),
                 child: Card(
                   elevation: 5,
                   child: Padding(
@@ -53,13 +52,13 @@ class _RegistrationViewState extends State<RegistrationView> {
                                   (err) => err.whenOrNull(
                                     userAlreadyRegistered: () =>
                                         FlushbarHelper.createError(
-                                      message: t
-                                          .registrationUserAlreadyRegisteredError,
-                                    ),
+                                          message: t
+                                              .registrationUserAlreadyRegisteredError,
+                                        ),
                                     unexpectedError: (message, _) =>
                                         FlushbarHelper.createError(
-                                      message: message!,
-                                    ),
+                                          message: message!,
+                                        ),
                                   ),
                                 )
                                 ?.show(context);
@@ -96,7 +95,7 @@ class _RegistrationViewState extends State<RegistrationView> {
     for (var controller in [
       _usernameTextController,
       _passwordTextController,
-      _confirmPasswordTextController
+      _confirmPasswordTextController,
     ]) {
       controller.dispose();
     }
@@ -104,130 +103,126 @@ class _RegistrationViewState extends State<RegistrationView> {
   }
 
   Widget _buildTitle(AppLocalizations t) => Text(
-        t.registrationTitle,
-        style: const TextStyle(
-          fontSize: 30,
-          fontWeight: FontWeight.bold,
-          overflow: TextOverflow.ellipsis,
-        ),
-      );
+    t.registrationTitle,
+    style: const TextStyle(
+      fontSize: 30,
+      fontWeight: FontWeight.bold,
+      overflow: TextOverflow.ellipsis,
+    ),
+  );
 
   Widget _buildUsernameField(
     BuildContext context,
     AppLocalizations t,
     RegistrationState state,
-  ) =>
-      TextFormField(
-        controller: _usernameTextController,
-        keyboardType: TextInputType.text,
-        autocorrect: false,
-        textInputAction: TextInputAction.next,
-        enableSuggestions: false,
-        maxLength: 255,
-        enabled: !state.isRegistering,
-        decoration: InputDecoration(
-          labelText: t.registrationUsernameLabel,
-        ),
-        onFieldSubmitted: _onFieldSubmitted(context, state),
-        validator: (value) => _validateFormField(
-          value: value,
-          nullErrorMessage: t.nullRegistrationUsernameError,
-          blankErrorMessage: t.blankRegistrationUsernameError,
-        ),
-      );
+  ) => TextFormField(
+    controller: _usernameTextController,
+    keyboardType: TextInputType.text,
+    autocorrect: false,
+    textInputAction: TextInputAction.next,
+    enableSuggestions: false,
+    maxLength: 255,
+    enabled: !state.isRegistering,
+    decoration: InputDecoration(labelText: t.registrationUsernameLabel),
+    onFieldSubmitted: _onFieldSubmitted(context, state),
+    validator: (value) => _validateFormField(
+      value: value,
+      nullErrorMessage: t.nullRegistrationUsernameError,
+      blankErrorMessage: t.blankRegistrationUsernameError,
+    ),
+  );
 
   Widget _buildPasswordField(
     BuildContext context,
     AppLocalizations t,
     RegistrationState state,
-  ) =>
-      TextFormField(
-        controller: _passwordTextController,
-        keyboardType: TextInputType.text,
-        obscureText: true,
-        autocorrect: false,
-        textInputAction: TextInputAction.next,
-        enableSuggestions: false,
-        maxLength: 255,
-        enabled: !state.isRegistering,
-        decoration: InputDecoration(
-          labelText: t.registrationPasswordLabel,
-        ),
-        onFieldSubmitted: _onFieldSubmitted(context, state),
-        validator: (value) {
-          var error = _validateFormField(
-            value: value,
-            nullErrorMessage: t.nullRegistrationPasswordError,
-            blankErrorMessage: t.blankRegistrationPasswordError,
-          );
-          if (error == null && value != _confirmPasswordTextController.text) {
-            error = t.registrationPasswordsMismatchError;
-          }
-
-          return error;
-        },
+  ) => TextFormField(
+    controller: _passwordTextController,
+    keyboardType: TextInputType.text,
+    obscureText: true,
+    autocorrect: false,
+    textInputAction: TextInputAction.next,
+    enableSuggestions: false,
+    maxLength: 255,
+    enabled: !state.isRegistering,
+    decoration: InputDecoration(labelText: t.registrationPasswordLabel),
+    onFieldSubmitted: _onFieldSubmitted(context, state),
+    validator: (value) {
+      var error = _validateFormField(
+        value: value,
+        nullErrorMessage: t.nullRegistrationPasswordError,
+        blankErrorMessage: t.blankRegistrationPasswordError,
       );
+      if (error == null && value != _confirmPasswordTextController.text) {
+        error = t.registrationPasswordsMismatchError;
+      }
+
+      return error;
+    },
+  );
 
   Widget _buildConfirmPasswordField(
     BuildContext context,
     AppLocalizations t,
     RegistrationState state,
-  ) =>
-      Container(
-        margin: const EdgeInsets.only(bottom: 30),
-        child: TextFormField(
-          controller: _confirmPasswordTextController,
-          keyboardType: TextInputType.text,
-          obscureText: true,
-          autocorrect: false,
-          textInputAction: TextInputAction.done,
-          enableSuggestions: false,
-          maxLength: 255,
-          enabled: !state.isRegistering,
-          decoration: InputDecoration(
-            labelText: t.registrationPasswordConfirmationLabel,
-          ),
-          onFieldSubmitted: _onFieldSubmitted(context, state),
-          validator: (value) {
-            var error = _validateFormField(
-              value: value,
-              nullErrorMessage: t.nullRegistrationPasswordError,
-              blankErrorMessage: t.blankRegistrationPasswordError,
-            );
-            if (error == null && value != _passwordTextController.text) {
-              error = t.registrationPasswordsMismatchError;
-            }
+  ) => Container(
+    margin: const EdgeInsets.only(bottom: 30),
+    child: TextFormField(
+      controller: _confirmPasswordTextController,
+      keyboardType: TextInputType.text,
+      obscureText: true,
+      autocorrect: false,
+      textInputAction: TextInputAction.done,
+      enableSuggestions: false,
+      maxLength: 255,
+      enabled: !state.isRegistering,
+      decoration: InputDecoration(
+        labelText: t.registrationPasswordConfirmationLabel,
+      ),
+      onFieldSubmitted: _onFieldSubmitted(context, state),
+      validator: (value) {
+        var error = _validateFormField(
+          value: value,
+          nullErrorMessage: t.nullRegistrationPasswordError,
+          blankErrorMessage: t.blankRegistrationPasswordError,
+        );
+        if (error == null && value != _passwordTextController.text) {
+          error = t.registrationPasswordsMismatchError;
+        }
 
-            return error;
-          },
-        ),
-      );
+        return error;
+      },
+    ),
+  );
 
   Widget _buildFormButtons(
-          BuildContext context, AppLocalizations t, RegistrationState state) =>
-      Align(
-        alignment: Alignment.centerRight,
-        child: state.isRegistering
-            ? const CircularProgressIndicator()
-            : ElevatedButton(
-                onPressed: () => _onSubmit(context),
-                child: Text(
-                  t.registrationButtonLabel,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-      );
+    BuildContext context,
+    AppLocalizations t,
+    RegistrationState state,
+  ) => Align(
+    alignment: Alignment.centerRight,
+    child: state.isRegistering
+        ? const CircularProgressIndicator()
+        : ElevatedButton(
+            onPressed: () => _onSubmit(context),
+            child: Text(
+              t.registrationButtonLabel,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+  );
 
   ValueChanged<String>? _onFieldSubmitted(
-          BuildContext context, RegistrationState state) =>
-      state.isRegistering ? null : (_) => _onSubmit(context);
+    BuildContext context,
+    RegistrationState state,
+  ) => state.isRegistering ? null : (_) => _onSubmit(context);
 
   void _onSubmit(BuildContext context) {
     if (_formKey.currentState!.validate()) {
       context.read<RegistrationBloc>().register(
-            username: _usernameTextController.text,
-            password: _passwordTextController.text,
-          );
+        username: _usernameTextController.text,
+        password: _passwordTextController.text,
+      );
     }
   }
 
@@ -235,10 +230,9 @@ class _RegistrationViewState extends State<RegistrationView> {
     String? value,
     required String nullErrorMessage,
     required String blankErrorMessage,
-  }) =>
-      value == null
-          ? nullErrorMessage
-          : value.trim().isEmpty
-              ? blankErrorMessage
-              : null;
+  }) => value == null
+      ? nullErrorMessage
+      : value.trim().isEmpty
+      ? blankErrorMessage
+      : null;
 }

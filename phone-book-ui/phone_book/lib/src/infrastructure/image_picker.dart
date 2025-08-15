@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:dartz/dartz.dart';
 import 'package:file_picker/file_picker.dart';
@@ -24,25 +23,27 @@ class ImagePickerError with _$ImagePickerError {
 
 FutureOr<Either<ImagePickerError, Uint8List?>> pickImage([int? maxSize]) async {
   try {
-    final data = (await FilePicker.platform
-            .pickFiles(type: FileType.image, withData: true))
-        ?.files
-        .single;
+    final data = (await FilePicker.platform.pickFiles(
+      type: FileType.image,
+      withData: true,
+    ))?.files.single;
     return data == null || maxSize == null
         ? right(data?.bytes)
         : data.size <= maxSize
-            ? right(data.bytes)
-            : left(const ImagePickerError.imageTooBig());
+        ? right(data.bytes)
+        : left(const ImagePickerError.imageTooBig());
   } on PlatformException catch (ex, stacktrace) {
     if (ex.code == _accessToStorageNotGrantedErrorCode) {
       return left(
         const ImagePickerError.permissionsToAccessStorageNotGranted(),
       );
     } else {
-      return left(ImagePickerError.unexpectedError(
-        message: ex.toString(),
-        stacktrace: stacktrace,
-      ));
+      return left(
+        ImagePickerError.unexpectedError(
+          message: ex.toString(),
+          stacktrace: stacktrace,
+        ),
+      );
     }
   }
 }

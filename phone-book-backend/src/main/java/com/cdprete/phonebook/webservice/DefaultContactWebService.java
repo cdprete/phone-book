@@ -51,7 +51,7 @@ public class DefaultContactWebService implements ContactWebService {
 
     // TODO make this sortable
     @Override
-    public ResponseEntity<Set<@Valid BasicContactRead>> readContacts(Pageable pageable, String searchValue, HttpServletRequest servletRequest) {
+    public ResponseEntity<Set<BasicContactRead>> readContacts(Pageable pageable, String searchValue, HttpServletRequest servletRequest) {
         var unsortedPageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
         var contactsPage = contactService.readContacts(unsortedPageRequest, searchValue);
         var links = linkFactory.fromPaginatedHttpRequest(contactsPage, servletRequest);

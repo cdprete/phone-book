@@ -13,6 +13,10 @@ spring:
 server:
   # Make active requests complete before stopping the server when receiving the shutdown signal.
   shutdown: graceful
+  # Enable HTTP/2 support
+  http2.enabled: true
+  # Enable requests compression
+  compression.enabled: true
 
   # Configuration properties for the (Netty) embedded application server.
   servlet:

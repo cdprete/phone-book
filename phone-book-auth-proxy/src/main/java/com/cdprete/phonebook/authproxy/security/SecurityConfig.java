@@ -33,7 +33,7 @@ import static org.springframework.web.cors.CorsConfiguration.ALL;
  * @author Cosimo Damiano Prete
  * @since 16/02/2022
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @EnableWebFluxSecurity
 class SecurityConfig {
     private static final String EXPECTED_AUTHORITY = "USER";

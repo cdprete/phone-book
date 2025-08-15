@@ -27,16 +27,14 @@ FutureOr<Map<String, dynamic>> serializeSettings(Settings object) =>
     object.toJson();
 
 @freezed
-class Settings with _$Settings {
-  factory Settings({
-    required int maxImageSizeBytes,
-  }) = _Settings;
+sealed class Settings with _$Settings {
+  factory Settings({required int maxImageSizeBytes}) = _Settings;
   factory Settings.fromJson(Map<String, dynamic> json) =>
       _$SettingsFromJson(json);
 }
 
 @freezed
-class SettingsError with _$SettingsError {
+sealed class SettingsError with _$SettingsError {
   const factory SettingsError.unauthenticated() = SettingsErrorUnauthenticated;
   const factory SettingsError.unexpectedError({
     String? message,

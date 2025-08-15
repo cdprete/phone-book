@@ -47,7 +47,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     emit(state.copyWith(isLoggingIn: false, loginError: optionOf(error)));
   }
 
-  AuthError _mapException(Exception e, StackTrace s) => e is DioError
+  AuthError _mapException(Exception e, StackTrace s) => e is DioException
       ? e.response?.statusCode == 401
           ? const AuthError.unauthorized()
           : AuthError.unexpectedError(message: e.response?.data, stacktrace: s)

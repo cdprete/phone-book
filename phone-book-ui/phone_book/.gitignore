@@ -14,6 +14,7 @@
 **/*.freezed.dart
 **/*.g.dart
 **/*.gr.dart
+**/app_localizations*.dart
 
 ### Web related ###
 

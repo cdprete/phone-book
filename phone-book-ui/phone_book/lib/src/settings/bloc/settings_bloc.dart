@@ -34,7 +34,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     }
   }
 
-  SettingsError _mapException(Exception e, StackTrace s) => e is DioError
+  SettingsError _mapException(Exception e, StackTrace s) => e is DioException
       ? e.response?.statusCode == 401
           ? const SettingsError.unauthenticated()
           : SettingsError.unexpectedError(

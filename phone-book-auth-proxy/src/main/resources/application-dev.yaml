@@ -1,5 +1,5 @@
 # Proxy routing configuration
-spring.cloud.gateway:
+spring.cloud.gateway.server.webflux:
   default-filters:
     # Headers to remove from the request before forwarding it
     - name: RemoveRequestHeader
@@ -18,7 +18,7 @@ spring.cloud.gateway:
         - PreserveHostHeader
         # Extract the username from the incoming Authorization header and propagate it as the header configured in the
         # default-filters[0].args[0].name property (a.k.a. 'X-Auth-User')
-        - AuthenticationIdentityPropagator=${spring.cloud.gateway.default-filters[0].args[0].name}
+        - AuthenticationIdentityPropagator=${spring.cloud.gateway.server.webflux.default-filters[0].args[0].name}
         # Do not propagate further the Authorization header
         - RemoveRequestHeader=Authorization
     - id: backend-actuator

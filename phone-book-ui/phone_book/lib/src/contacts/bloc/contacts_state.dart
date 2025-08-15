@@ -1,7 +1,7 @@
 part of 'contacts_bloc.dart';
 
 @freezed
-class ContactsState with _$ContactsState {
+sealed class ContactsState with _$ContactsState {
   const ContactsState._();
 
   const factory ContactsState({
@@ -15,7 +15,7 @@ class ContactsState with _$ContactsState {
 }
 
 @freezed
-class _DeleteContact with _$_DeleteContact {
+sealed class _DeleteContact with _$DeleteContact {
   const _DeleteContact._();
 
   const factory _DeleteContact({
@@ -26,7 +26,7 @@ class _DeleteContact with _$_DeleteContact {
 }
 
 @freezed
-class _FetchContacts with _$_FetchContacts {
+sealed class _FetchContacts with _$FetchContacts {
   const factory _FetchContacts({
     @Default(false) bool isFetchingContacts,
     @Default(Page()) Page<Contact> contactsPage,
@@ -35,7 +35,7 @@ class _FetchContacts with _$_FetchContacts {
 }
 
 @freezed
-class _FetchSingleContact with _$_FetchSingleContact {
+sealed class _FetchSingleContact with _$FetchSingleContact {
   const factory _FetchSingleContact({
     @Default(false) bool isFetchingSingleContact,
     @Default(None()) Option<Contact> contact,
@@ -44,7 +44,7 @@ class _FetchSingleContact with _$_FetchSingleContact {
 }
 
 @freezed
-class _SelectContactImage with _$_SelectContactImage {
+sealed class _SelectContactImage with _$SelectContactImage {
   const factory _SelectContactImage({
     @Default(false) bool isSelectingContactImage,
     @Default(None()) Option<ImagePickerError> error,
@@ -53,7 +53,7 @@ class _SelectContactImage with _$_SelectContactImage {
 }
 
 @freezed
-class _EditContact with _$_EditContact {
+sealed class _EditContact with _$EditContact {
   const _EditContact._();
 
   const factory _EditContact({
@@ -65,7 +65,7 @@ class _EditContact with _$_EditContact {
 }
 
 @freezed
-class _CreateContact with _$_CreateContact {
+sealed class _CreateContact with _$CreateContact {
   const _CreateContact._();
 
   const factory _CreateContact({

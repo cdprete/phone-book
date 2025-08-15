@@ -26,7 +26,7 @@ metadata:
 immutable: true
 data:
   application-prod.yaml: |-
-    spring.cloud.gateway:
+    spring.cloud.gateway.server.webflux:
       default-filters:
       - PreserveHostHeader
       - RemoveRequestHeader=Authorization
@@ -40,7 +40,7 @@ data:
         predicates:
         - Path=/phone-book/v*/**
         filters:
-        - AuthenticationIdentityPropagator=${spring.cloud.gateway.default-filters[2].args[0].name}
+        - AuthenticationIdentityPropagator=${spring.cloud.gateway.server.webflux.default-filters[2].args[0].name}
       - id: backend-actuator
         uri: http://localhost:8081
         predicates:

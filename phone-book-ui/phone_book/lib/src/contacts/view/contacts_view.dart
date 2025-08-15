@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:phone_book/localization/app_localizations.dart';
 import 'package:phone_book/src/contacts/bloc/contacts_bloc.dart';
 import 'package:phone_book/src/contacts/widget/contact_details_widget.dart';
 import 'package:phone_book/src/contacts/widget/contacts_widget.dart';
@@ -8,7 +8,7 @@ import 'package:phone_book/src/contacts/widget/edit_contact_widget.dart';
 import 'package:phone_book/src/contacts/widget/no_contact_selected_widget.dart';
 
 class MasterDetailContactsView extends StatefulWidget {
-  const MasterDetailContactsView({Key? key}) : super(key: key);
+  const MasterDetailContactsView({super.key});
 
   @override
   State<MasterDetailContactsView> createState() =>
@@ -22,7 +22,7 @@ class _MasterDetailContactsViewState extends State<MasterDetailContactsView> {
 
   @override
   void initState() {
-    WidgetsBinding.instance?.addPostFrameCallback(
+    WidgetsBinding.instance.addPostFrameCallback(
       (_) => setState(
         () => addButtonHeight = addButtonKey.currentContext?.size?.height ?? 0,
       ),
@@ -48,9 +48,9 @@ class _MasterDetailContactsViewState extends State<MasterDetailContactsView> {
                   ),
                 ),
                 Expanded(
-                  child: _DetailView(addButtonHeight: addButtonHeight),
                   flex: 4,
-                )
+                  child: _DetailView(addButtonHeight: addButtonHeight),
+                ),
               ],
             ),
           ),
@@ -78,10 +78,7 @@ class _MasterDetailContactsViewState extends State<MasterDetailContactsView> {
 class _DetailView extends StatelessWidget {
   final double addButtonHeight;
 
-  const _DetailView({
-    Key? key,
-    required this.addButtonHeight,
-  }) : super(key: key);
+  const _DetailView({required this.addButtonHeight});
 
   @override
   Widget build(BuildContext context) =>

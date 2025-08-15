@@ -11,7 +11,7 @@ import static org.springframework.context.annotation.ScopedProxyMode.INTERFACES;
  * @author Cosimo Damiano Prete
  * @since 11/02/2022
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 class SecurityConfig {
     @Bean
     @RequestScope(proxyMode = INTERFACES)

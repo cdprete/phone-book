@@ -12,7 +12,6 @@
     <developers>
         <developer>
             <name>Cosimo Damiano Prete</name>
-            <email>cosimo.prete.damiano@gmail.com</email>
             <roles>
                 <role>Owner</role>
                 <role>Developer</role>
@@ -41,25 +40,24 @@
         <docker.image-name>${project.artifactId}</docker.image-name>
         <docker.repository-name>docker.io/cdprete</docker.repository-name>
         <docker.qualified-image-name>${docker.repository-name}/${docker.image-name}</docker.qualified-image-name>
-        <jkube-maven-plugin.version>1.12.0</jkube-maven-plugin.version>
+        <jkube-maven-plugin.version>1.18.1</jkube-maven-plugin.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <java.version>17</java.version>
+        <java.version>21</java.version>
 
-        <maven.compiler.source>${java.version}</maven.compiler.source>
-        <maven.compiler.target>${java.version}</maven.compiler.target>
         <maven.compiler.release>${java.version}</maven.compiler.release>
         <maven.compiler.parameters>true</maven.compiler.parameters>
 
-        <esapi.version>2.5.2.0</esapi.version>
-        <nimbus-jose-jwt.version>9.31</nimbus-jose-jwt.version>
-        <spring-boot.version>3.1.0</spring-boot.version>
+        <esapi.version>2.7.0.0</esapi.version>
+        <nimbus-jose-jwt.version>10.4.2</nimbus-jose-jwt.version>
+        <spring-boot.version>3.5.4</spring-boot.version>
 
-        <exec-maven-plugin.version>3.1.0</exec-maven-plugin.version>
-        <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
+        <exec-maven-plugin.version>3.5.1</exec-maven-plugin.version>
+        <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
         <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
+        <maven.version.ignore>(?i).*-(alpha|beta|rc|m)([-.]?\d+)?</maven.version.ignore>
     </properties>
 
     <dependencyManagement>

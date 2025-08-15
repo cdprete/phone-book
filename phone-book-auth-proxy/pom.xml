@@ -11,7 +11,7 @@
     <artifactId>phone-book-auth-proxy</artifactId>
 
     <properties>
-        <spring-cloud.version>2022.0.3</spring-cloud.version>
+        <spring-cloud.version>2025.0.0</spring-cloud.version>
     </properties>
 
     <profiles>
@@ -62,7 +62,7 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-gateway</artifactId>
+            <artifactId>spring-cloud-starter-gateway-server-webflux</artifactId>
         </dependency>
 
         <dependency>

@@ -5,11 +5,12 @@ import 'package:dartz/dartz.dart' as f;
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:phone_book/localization/app_localizations.dart';
 import 'package:phone_book/src/api/contacts_api.dart';
 import 'package:phone_book/src/contacts/bloc/contacts_bloc.dart';
 import 'package:phone_book/src/di/injector.dart';
+import 'package:phone_book/src/infrastructure/image_picker.dart';
 import 'package:phone_book/src/settings/bloc/settings_bloc.dart';
 
 part 'edit_contact_widget.freezed.dart';
@@ -18,7 +19,7 @@ class EditContactWidget extends StatefulWidget {
   // true = edit, false = create
   final bool edit;
 
-  const EditContactWidget({Key? key, this.edit = true}) : super(key: key);
+  const EditContactWidget({super.key, this.edit = true});
 
   @override
   State<StatefulWidget> createState() => _EditContactsWidgetState();
@@ -30,15 +31,18 @@ class _EditContactsWidgetState extends State<EditContactWidget> {
   final surnameKey = GlobalKey<_GeneralInfoFieldState>();
 
   final List<_KeyTextAndType<_EmailAddressFieldState, EmailAddressType>>
-      emailAddresses = [];
+  emailAddresses = [];
   final List<_KeyTextAndType<_PhoneNumberFieldState, PhoneNumberType>>
-      phoneNumbers = [];
+  phoneNumbers = [];
   final ScrollController scrollController = ScrollController();
 
   @override
   void initState() {
-    final contact =
-        context.read<ContactsBloc>().state.fetchSingleContact.contact;
+    final contact = context
+        .read<ContactsBloc>()
+        .state
+        .fetchSingleContact
+        .contact;
     initListKeys<EmailAddress, EmailAddressType, _EmailAddressFieldState>(
       contact.map((c) => c.emailAddresses).getOrElse(() => {}),
       emailAddresses,
@@ -62,11 +66,13 @@ class _EditContactsWidgetState extends State<EditContactWidget> {
   ) {
     if (widget.edit) {
       for (E item in items ?? []) {
-        keys.add(_KeyTextAndType(
-          key: GlobalKey(),
-          text: textGetter.call(item),
-          type: typeGetter.call(item),
-        ));
+        keys.add(
+          _KeyTextAndType(
+            key: GlobalKey(),
+            text: textGetter.call(item),
+            type: typeGetter.call(item),
+          ),
+        );
       }
     }
     if (keys.isEmpty) {
@@ -76,102 +82,98 @@ class _EditContactsWidgetState extends State<EditContactWidget> {
 
   @override
   Widget build(BuildContext context) => BlocProvider<SettingsBloc>(
-        create: (context) => getIt.get()..fetchSettings(),
-        child: BlocConsumer<ContactsBloc, ContactsState>(
-          listener: (context, state) {
-            final t = AppLocalizations.of(context)!;
-            if (widget.edit) {
-              final editState = state.editContact;
-              editState.error.fold(() {
-                if (editState.editContactSuccess) {
-                  FlushbarHelper.createSuccess(
-                    message: t.editContactSuccessfulMessage,
-                  ).show(context);
-                }
-              }, (err) => err.whenOrNull());
-            } else {
-              final createState = state.createContact;
-              createState.error.fold(
-                () {
-                  if (createState.createContactSuccess) {
-                    FlushbarHelper.createSuccess(
-                      message: t.createContactSuccessfulMessage,
-                    ).show(context);
-                  }
-                },
-                (err) => err.whenOrNull(),
-              );
+    create: (context) => getIt.get()..fetchSettings(),
+    child: BlocConsumer<ContactsBloc, ContactsState>(
+      listener: (context, state) {
+        final t = AppLocalizations.of(context)!;
+        if (widget.edit) {
+          final editState = state.editContact;
+          editState.error.fold(() {
+            if (editState.editContactSuccess) {
+              FlushbarHelper.createSuccess(
+                message: t.editContactSuccessfulMessage,
+              ).show(context);
             }
-          },
-          builder: (context, state) {
-            final contact =
-                context.read<ContactsBloc>().state.fetchSingleContact.contact;
+          }, (err) => err.whenOrNull());
+        } else {
+          final createState = state.createContact;
+          createState.error.fold(() {
+            if (createState.createContactSuccess) {
+              FlushbarHelper.createSuccess(
+                message: t.createContactSuccessfulMessage,
+              ).show(context);
+            }
+          }, (err) => err.whenOrNull());
+        }
+      },
+      builder: (context, state) {
+        final contact = context
+            .read<ContactsBloc>()
+            .state
+            .fetchSingleContact
+            .contact;
 
-            return Form(
-              key: formKey,
-              child: ListView(
-                controller: scrollController,
-                children: [
-                  _ImageField(edit: widget.edit),
-                  _GeneralInfoField(
-                    key: nameKey,
-                    otherKey: surnameKey,
-                    initialValue: widget.edit
-                        ? contact.map((c) => c.name).toNullable()
-                        : null,
-                    label: (t) => t.contactDetailsNameFieldName,
-                    validationError: (t) => t.missingNameError,
-                  ),
-                  Container(
-                    margin: const EdgeInsets.only(bottom: 50),
-                    child: _GeneralInfoField(
-                      key: surnameKey,
-                      otherKey: nameKey,
-                      initialValue: widget.edit
-                          ? contact.map((c) => c.surname).toNullable()
-                          : null,
-                      label: (t) => t.contactDetailsSurnameFieldName,
-                      validationError: (t) => t.missingSurnameError,
-                    ),
-                  ),
-                  for (final emailAddress in emailAddresses)
-                    _EmailAddressField(
-                      key: emailAddress.key,
-                      initialValue: emailAddress.text,
-                      initialType: emailAddress.type,
-                      onRemoveClick: (key) => onRemoveButtonClick(
-                        emailAddresses,
-                        key,
-                      ),
-                      otherEmailAddresses: emailAddresses
-                          .map((e) => e.key)
-                          .where((key) => key != emailAddress.key),
-                    ),
-                  _PlusButton(onClick: () => onPlusButtonClick(emailAddresses)),
-                  for (final phoneNumber in phoneNumbers)
-                    _PhoneNumberField(
-                      key: phoneNumber.key,
-                      initialValue: phoneNumber.text,
-                      initialType: phoneNumber.type,
-                      onRemoveClick: (key) => onRemoveButtonClick(
-                        phoneNumbers,
-                        key,
-                      ),
-                      otherPhoneNumbers: phoneNumbers
-                          .map((p) => p.key)
-                          .where((key) => key != phoneNumber.key),
-                    ),
-                  _PlusButton(onClick: () => onPlusButtonClick(phoneNumbers)),
-                  _FormButtons(
-                    onSubmit: () => onSubmit(context),
-                    onCancel: () => onCancel(context),
-                  ),
-                ],
+        return Form(
+          key: formKey,
+          child: ListView(
+            controller: scrollController,
+            children: [
+              _ImageField(edit: widget.edit),
+              _GeneralInfoField(
+                key: nameKey,
+                otherKey: surnameKey,
+                initialValue: widget.edit
+                    ? contact.map((c) => c.name).toNullable()
+                    : null,
+                label: (t) => t.contactDetailsNameFieldName,
+                validationError: (t) => t.missingNameError,
               ),
-            );
-          },
-        ),
-      );
+              Container(
+                margin: const EdgeInsets.only(bottom: 50),
+                child: _GeneralInfoField(
+                  key: surnameKey,
+                  otherKey: nameKey,
+                  initialValue: widget.edit
+                      ? contact.map((c) => c.surname).toNullable()
+                      : null,
+                  label: (t) => t.contactDetailsSurnameFieldName,
+                  validationError: (t) => t.missingSurnameError,
+                ),
+              ),
+              for (final emailAddress in emailAddresses)
+                _EmailAddressField(
+                  key: emailAddress.key,
+                  initialValue: emailAddress.text,
+                  initialType: emailAddress.type,
+                  onRemoveClick: (key) =>
+                      onRemoveButtonClick(emailAddresses, key),
+                  otherEmailAddresses: emailAddresses
+                      .map((e) => e.key)
+                      .where((key) => key != emailAddress.key),
+                ),
+              _PlusButton(onClick: () => onPlusButtonClick(emailAddresses)),
+              for (final phoneNumber in phoneNumbers)
+                _PhoneNumberField(
+                  key: phoneNumber.key,
+                  initialValue: phoneNumber.text,
+                  initialType: phoneNumber.type,
+                  onRemoveClick: (key) =>
+                      onRemoveButtonClick(phoneNumbers, key),
+                  otherPhoneNumbers: phoneNumbers
+                      .map((p) => p.key)
+                      .where((key) => key != phoneNumber.key),
+                ),
+              _PlusButton(onClick: () => onPlusButtonClick(phoneNumbers)),
+              _FormButtons(
+                onSubmit: () => onSubmit(context),
+                onCancel: () => onCancel(context),
+              ),
+            ],
+          ),
+        );
+      },
+    ),
+  );
 
   void onPlusButtonClick<S extends State<StatefulWidget>, T>(
     List<_KeyTextAndType<S, T>> targetList,
@@ -305,13 +307,15 @@ class _EmailAddressFieldState extends State<_EmailAddressField> {
             isExpanded: true,
             value: type,
             items: EmailAddressType.values
-                .map((t) => DropdownMenuItem(
-                      value: t,
-                      child: Text(
-                        t.translate(context),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ))
+                .map(
+                  (t) => DropdownMenuItem(
+                    value: t,
+                    child: Text(
+                      t.translate(context),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                )
                 .toList(),
             onChanged: (t) => setState(() => type = t!),
           ),
@@ -319,7 +323,7 @@ class _EmailAddressFieldState extends State<_EmailAddressField> {
         IconButton(
           onPressed: () => widget.onRemoveClick(widget.key!),
           icon: const Icon(Icons.remove),
-        )
+        ),
       ],
     );
   }
@@ -417,7 +421,7 @@ class _PhoneNumberFieldState extends State<_PhoneNumberField> {
         IconButton(
           onPressed: () => widget.onRemoveClick(widget.key!),
           icon: const Icon(Icons.remove),
-        )
+        ),
       ],
     );
   }
@@ -448,67 +452,68 @@ class _PhoneNumberFieldState extends State<_PhoneNumberField> {
 class _ImageField extends StatelessWidget {
   final bool edit;
 
-  const _ImageField({Key? key, required this.edit}) : super(key: key);
+  const _ImageField({required this.edit});
 
   @override
   Widget build(BuildContext context) =>
       BlocBuilder<SettingsBloc, SettingsState>(
-          builder: (context, settingsState) =>
-              BlocConsumer<ContactsBloc, ContactsState>(
-                listener: (context, state) =>
-                    state.selectContactImage.error.foldLeft(null, (_, err) {
-                  final t = AppLocalizations.of(context)!;
-                  final message = err.whenOrNull(
-                    permissionsToAccessStorageNotGranted: () =>
-                        t.storagePermissionsError,
-                    imageTooBig: () => t.imageTooBigError,
-                  );
-                  if (message != null) {
-                    FlushbarHelper.createError(message: message).show(context);
-                  }
-                }),
-                builder: (context, state) => state
-                        .selectContactImage.isSelectingContactImage
-                    ? const Center(child: CircularProgressIndicator())
-                    : _getContactImage(state, edit).fold(
-                        () => IconButton(
-                          onPressed: () => onImageButtonClick(context),
-                          icon: const Icon(Icons.add_photo_alternate_outlined),
-                        ),
-                        (img) => Center(
-                          child: LayoutBuilder(
-                            builder: (context, constraints) => ConstrainedBox(
-                              child: InkWell(
-                                child: Image.memory(img),
-                                onTap: () => onImageButtonClick(context),
-                              ),
-                              constraints: BoxConstraints(
-                                maxWidth: constraints.maxWidth / 3,
-                              ),
+        builder: (context, settingsState) =>
+            BlocConsumer<ContactsBloc, ContactsState>(
+              listener: (context, state) =>
+                  state.selectContactImage.error.foldLeft(null, (_, err) {
+                    final t = AppLocalizations.of(context)!;
+                    final message = err.whenOrNull(
+                      permissionsToAccessStorageNotGranted: () =>
+                          t.storagePermissionsError,
+                      imageTooBig: () => t.imageTooBigError,
+                    );
+                    if (message != null) {
+                      FlushbarHelper.createError(
+                        message: message,
+                      ).show(context);
+                    }
+                  }),
+              builder: (context, state) =>
+                  state.selectContactImage.isSelectingContactImage
+                  ? const Center(child: CircularProgressIndicator())
+                  : _getContactImage(state, edit).fold(
+                      () => IconButton(
+                        onPressed: () => onImageButtonClick(context),
+                        icon: const Icon(Icons.add_photo_alternate_outlined),
+                      ),
+                      (img) => Center(
+                        child: LayoutBuilder(
+                          builder: (context, constraints) => ConstrainedBox(
+                            constraints: BoxConstraints(
+                              maxWidth: constraints.maxWidth / 3,
+                            ),
+                            child: InkWell(
+                              child: Image.memory(img),
+                              onTap: () => onImageButtonClick(context),
                             ),
                           ),
                         ),
                       ),
-              ));
+                    ),
+            ),
+      );
 
   void onImageButtonClick(BuildContext context) {
     context.read<ContactsBloc>().selectImage(
-          maxSize: context
-              .read<SettingsBloc>()
-              .state
-              .settings
-              .map((s) => s.maxImageSizeBytes)
-              .toNullable(),
-        );
+      maxSize: context
+          .read<SettingsBloc>()
+          .state
+          .settings
+          .map((s) => s.maxImageSizeBytes)
+          .toNullable(),
+    );
   }
 }
 
 f.Option<Uint8List> _getContactImage(ContactsState state, bool edit) =>
     state.selectContactImage.contactImage.orElse(
       () => edit
-          ? state.fetchSingleContact.contact.flatMap(
-              (c) => f.optionOf(c.image),
-            )
+          ? state.fetchSingleContact.contact.flatMap((c) => f.optionOf(c.image))
           : f.none(),
     );
 
@@ -516,11 +521,7 @@ class _FormButtons extends StatelessWidget {
   final VoidCallback onSubmit;
   final VoidCallback onCancel;
 
-  const _FormButtons({
-    Key? key,
-    required this.onSubmit,
-    required this.onCancel,
-  }) : super(key: key);
+  const _FormButtons({required this.onSubmit, required this.onCancel});
 
   @override
   Widget build(BuildContext context) =>
@@ -553,7 +554,7 @@ class _FormButtons extends StatelessWidget {
                           ),
                         ),
                 ),
-              )
+              ),
             ],
           );
         },
@@ -566,21 +567,16 @@ class _FormButtons extends StatelessWidget {
 
 class _PlusButton extends StatelessWidget {
   final VoidCallback onClick;
-  const _PlusButton({Key? key, required this.onClick}) : super(key: key);
+  const _PlusButton({required this.onClick});
 
   @override
   Widget build(BuildContext context) => Container(
-        margin: const EdgeInsets.only(bottom: 50),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            IconButton(
-              onPressed: onClick,
-              icon: const Icon(Icons.add),
-            ),
-          ],
-        ),
-      );
+    margin: const EdgeInsets.only(bottom: 50),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [IconButton(onPressed: onClick, icon: const Icon(Icons.add))],
+    ),
+  );
 }
 
 class _GeneralInfoField extends StatefulWidget {
@@ -612,23 +608,23 @@ class _GeneralInfoFieldState extends State<_GeneralInfoField> {
 
   @override
   Widget build(BuildContext context) => TextFormField(
-        controller: controller,
-        keyboardType: TextInputType.name,
-        autocorrect: false,
-        textInputAction: TextInputAction.next,
-        enableSuggestions: false,
-        maxLength: 255,
-        decoration: InputDecoration(
-          labelText: widget.label.call(AppLocalizations.of(context)!),
-        ),
-        validator: (value) => _validate(context, value),
-      );
+    controller: controller,
+    keyboardType: TextInputType.name,
+    autocorrect: false,
+    textInputAction: TextInputAction.next,
+    enableSuggestions: false,
+    maxLength: 255,
+    decoration: InputDecoration(
+      labelText: widget.label.call(AppLocalizations.of(context)!),
+    ),
+    validator: (value) => _validate(context, value),
+  );
 
   String? _validate(BuildContext context, String? value) =>
       (value?.trim().isEmpty ?? true) &&
-              (widget.otherKey?.currentState?.text.trim().isEmpty ?? true)
-          ? widget.validationError.call(AppLocalizations.of(context)!)
-          : null;
+          (widget.otherKey?.currentState?.text.trim().isEmpty ?? true)
+      ? widget.validationError.call(AppLocalizations.of(context)!)
+      : null;
 
   String get text => controller.text.trim();
 
@@ -640,8 +636,8 @@ class _GeneralInfoFieldState extends State<_GeneralInfoField> {
 }
 
 @freezed
-class _KeyTextAndType<S extends State<StatefulWidget>, T>
-    with _$_KeyTextAndType<S, T> {
+sealed class _KeyTextAndType<S extends State<StatefulWidget>, T>
+    with _$KeyTextAndType<S, T> {
   const factory _KeyTextAndType({
     required GlobalKey<S> key,
     String? text,

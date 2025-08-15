@@ -7,7 +7,7 @@ import 'package:phone_book/src/di/injector.dart';
 
 @RoutePage(name: "ContactsPageRoute")
 class ContactsPage extends StatelessWidget {
-  const ContactsPage({Key? key}) : super(key: key);
+  const ContactsPage({super.key});
 
   @override
   Widget build(BuildContext context) {

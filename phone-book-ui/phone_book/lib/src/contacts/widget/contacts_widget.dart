@@ -3,8 +3,8 @@ import 'dart:ui';
 import 'package:another_flushbar/flushbar_helper.dart';
 import 'package:flutter/material.dart' hide Page;
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
+import 'package:phone_book/localization/app_localizations.dart';
 import 'package:phone_book/src/api/contacts_api.dart';
 import 'package:phone_book/src/contacts/bloc/contacts_bloc.dart';
 import 'package:phone_book/src/contacts/widget/contact_item_widget.dart';
@@ -14,18 +14,18 @@ class ContactsWidget extends StatefulWidget {
   final ContactItemClickCallback _onContactClick;
 
   const ContactsWidget({
-    Key? key,
+    super.key,
     required ContactItemClickCallback onContactClick,
-  })  : _onContactClick = onContactClick,
-        super(key: key);
+  }) : _onContactClick = onContactClick;
 
   @override
   State<ContactsWidget> createState() => _ContactsWidgetState();
 }
 
 class _ContactsWidgetState extends State<ContactsWidget> {
-  final PagingController<int, Contact> pagingController =
-      PagingController(firstPageKey: Page.firstPageNumber);
+  final PagingController<int, Contact> pagingController = PagingController(
+    firstPageKey: Page.firstPageNumber,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -34,10 +34,12 @@ class _ContactsWidgetState extends State<ContactsWidget> {
         bool create = curr.createContact.createContactSuccess;
         bool edit = curr.editContact.editContactSuccess;
         bool delete = curr.deleteContact.deleteContactSuccess;
-        bool hasFetchedPage = prev.fetchContacts.isFetchingContacts &&
+        bool hasFetchedPage =
+            prev.fetchContacts.isFetchingContacts &&
             !curr.fetchContacts.isFetchingContacts &&
             curr.fetchContacts.error.isNone();
-        bool isPageChanged = prev.fetchContacts.contactsPage.currentPage !=
+        bool isPageChanged =
+            prev.fetchContacts.contactsPage.currentPage !=
             curr.fetchContacts.contactsPage.currentPage;
 
         return create || edit || delete || hasFetchedPage || isPageChanged;
@@ -57,9 +59,7 @@ class _ContactsWidgetState extends State<ContactsWidget> {
           } else {
             message = t.deleteContactSuccessfulMessage;
           }
-          FlushbarHelper.createSuccess(
-            message: message,
-          ).show(context);
+          FlushbarHelper.createSuccess(message: message).show(context);
           pagingController.refresh();
         } else {
           _addFetchedContacts(state);
@@ -68,10 +68,9 @@ class _ContactsWidgetState extends State<ContactsWidget> {
       builder: (context, state) => RefreshIndicator(
         onRefresh: () => Future.sync(pagingController.refresh),
         child: ScrollConfiguration(
-          behavior: ScrollConfiguration.of(context).copyWith(dragDevices: {
-            PointerDeviceKind.touch,
-            PointerDeviceKind.mouse,
-          }),
+          behavior: ScrollConfiguration.of(context).copyWith(
+            dragDevices: {PointerDeviceKind.touch, PointerDeviceKind.mouse},
+          ),
           child: PagedListView<int, Contact>.separated(
             pagingController: pagingController,
             separatorBuilder: (context, index) => const SizedBox(height: 8),
@@ -116,9 +115,10 @@ class _ContactsWidgetState extends State<ContactsWidget> {
               status == PagingStatus.subsequentPageError) &&
           pagingController.error != null) {
         final err = (pagingController.error as ContactsError).whenOrNull(
-            unauthenticated: () =>
-                AppLocalizations.of(context)!.fetchContactsUnauthenticatedError,
-            unexpectedError: (err, _) => err);
+          unauthenticated: () =>
+              AppLocalizations.of(context)!.fetchContactsUnauthenticatedError,
+          unexpectedError: (err, _) => err,
+        );
         if (err != null) {
           FlushbarHelper.createError(message: err).show(context);
         }

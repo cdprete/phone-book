@@ -1,14 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:http_parser/http_parser.dart';
 import 'package:injectable/injectable.dart';
+import 'package:phone_book/localization/app_localizations.dart';
 import 'package:phone_book/src/api/backend_api.dart';
 import 'package:phone_book/src/di/http_client_module.dart';
 import 'package:retrofit/retrofit.dart';
@@ -60,14 +58,14 @@ FutureOr<Contact> deserializeContact(Map<String, dynamic> json) =>
 FutureOr<Map<String, dynamic>> serializeContact(Contact object) =>
     object.toJson();
 FutureOr<List<Contact>> deserializeContactList(
-        List<Map<String, dynamic>> json) =>
-    json.map((c) => Contact.fromJson(c)).toList();
+  List<Map<String, dynamic>> json,
+) => json.map((c) => Contact.fromJson(c)).toList();
 FutureOr<List<Map<String, dynamic>>> serializeContactList(
-        List<Contact> contacts) =>
-    contacts.map((c) => c.toJson()).toList();
+  List<Contact> contacts,
+) => contacts.map((c) => c.toJson()).toList();
 
 @freezed
-class Contact with _$Contact {
+sealed class Contact with _$Contact {
   const Contact._();
 
   @JsonSerializable(explicitToJson: true)
@@ -75,7 +73,7 @@ class Contact with _$Contact {
     String? id,
     String? name,
     String? surname,
-    @JsonKey(toJson: Contact.ignore) @Uint8ListConverter() Uint8List? image,
+    @JsonKey(includeToJson: false) @Uint8ListConverter() Uint8List? image,
     @Default({}) Set<EmailAddress> emailAddresses,
     @Default({}) Set<PhoneNumber> phoneNumbers,
   }) = _Contact;
@@ -95,12 +93,10 @@ class Contact with _$Contact {
       .where((value) => value.isNotEmpty)
       .map((value) => value[0].toUpperCase())
       .join();
-
-  static T? ignore<T>(dynamic _) => null;
 }
 
 @freezed
-class EmailAddress with _$EmailAddress {
+sealed class EmailAddress with _$EmailAddress {
   factory EmailAddress({
     required String emailAddress,
     required EmailAddressType type,
@@ -117,7 +113,7 @@ enum EmailAddressType {
   @JsonValue('OFFICE')
   office,
   @JsonValue('OTHER')
-  other
+  other,
 }
 
 extension EmailAddressTypeExtension on EmailAddressType {
@@ -135,7 +131,7 @@ extension EmailAddressTypeExtension on EmailAddressType {
 }
 
 @freezed
-class PhoneNumber with _$PhoneNumber {
+sealed class PhoneNumber with _$PhoneNumber {
   factory PhoneNumber({
     required String phoneNumber,
     required PhoneNumberType type,
@@ -154,7 +150,7 @@ enum PhoneNumberType {
   @JsonValue('OFFICE')
   office,
   @JsonValue('OTHER')
-  other
+  other,
 }
 
 extension PhoneNumberTypeExtension on PhoneNumberType {
@@ -184,7 +180,7 @@ class Uint8ListConverter implements JsonConverter<Uint8List?, String?> {
 }
 
 @freezed
-class ContactsError with _$ContactsError {
+sealed class ContactsError with _$ContactsError {
   const factory ContactsError.unauthenticated() = ContactsErrorUnauthenticated;
   const factory ContactsError.notAnImage() = ContactsErrorNotAnImage;
   const factory ContactsError.notFound() = ContactsErrorNotFound;
@@ -201,7 +197,7 @@ class ContactsError with _$ContactsError {
 }
 
 @freezed
-class ErrorResponse with _$ErrorResponse {
+sealed class ErrorResponse with _$ErrorResponse {
   factory ErrorResponse({
     required String code,
     required String defaultMessage,

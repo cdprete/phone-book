@@ -17,7 +17,7 @@ import static java.time.OffsetDateTime.now;
  * @author Cosimo Damiano Prete
  * @since 31/01/2022
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @EnableTransactionManagement
 @EnableJpaAuditing(
         auditorAwareRef = PersistenceConfig.AUDITOR_AWARE_BEAN_NAME,
